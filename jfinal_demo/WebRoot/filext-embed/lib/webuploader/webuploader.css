@@ -1,0 +1,52 @@
+.webuploader-container {
+	/* position: relative;
+	height:30px;
+	width:100%; */
+}
+.webuploader-element-invisible {
+	position: absolute !important;
+	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+    clip: rect(1px,1px,1px,1px);
+}
+.webuploader-pick {
+	/* height : 30px;
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	background: #428bca;  #00b7ee;
+	padding: 10px 15px;
+	color: #fff;
+	text-align: center;
+	border-radius: 3px;
+	overflow: hidden; */
+	display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    color: #fff;
+    background-color: #428bca;
+    border-color: #357ebd;
+    border-radius: 4px;
+    
+}
+.webuploader-pick-hover {
+	background: #428bca; /* #00a2d4 */
+}
+
+.webuploader-pick-disable {
+	opacity: 0.6;
+	pointer-events:none;
+}
+.icv_uploader{
+	width: 80px;
+	height: 30px;
+	margin-left: 20px;
+    margin-top: 15px;
+}
+

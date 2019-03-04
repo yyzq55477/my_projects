@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--<meta http-equiv="Refresh" content="1">-->
+<title>Testing websockets</title>
+</head>
+<body>
+  <form>
+	<fieldset> 
+		<legend align="center" >捷宇 技术雷 </legend>
+		<p><img id="photo" src="" width=900 height=480 ></p>
+		<input type="button" style=background:green value="启动主" name="StartBtn"  onClick="start('bStartPlay')">
+		<input type="button" style=background:green value="旋转启动主" name="StartBtn"  onClick="start('bStartPlayRotate(90)')">
+		<input type="button" style=background:green value="启动副" name="StopBtn" onClick="start('bStartPlay2')">
+		<input type="button" style=background:green value="停止" name="StopBtn" onClick="start('bStopPlay')">
+		<input type="button" style=background:green value="自动对焦" name="AutoFocus" onClick="start('AutoFocus')">
+		<input type="button" style=background:green value="识别二维码/条形码" name="sGetBarCodeOnline" onClick="start('sGetBarCodeOnline')">
+		<input type="button" style=background:green value="去黑边" name="StartBtn"  onClick="start('vSetDelHBFlag(true)')">
+		<P>
+		<input type="button" value="拍照" name="SaveJPGBtn" onClick="start('bSaveJPG(D:\\,Photo)')">
+		<input type="button" value="上传" name="bUpLoadImage" onClick="start('bUpLoadImage(D:\\1.JPG|D:\\2.JPG|D:\\3.JPG,192.168.3.118,8080,/shop/servlet/uploadServlet)')">
+		<input type="button" style=background:green value="FILTER设置" name="ParaSet" onClick="start('displayVideoPara')">
+		<input type="button" style=background:green value="PIN设置" name="ParaSet" onClick="start('vSetCapturePin')">
+		
+	</fieldset>
+   </f>
+   <div id="messages"></div>
+   <script type="text/javascript">
+     var webSocket =
+       new WebSocket('ws://localhost:1818');
+ 
+     webSocket.onerror = function(event) {
+       onError(event)
+    };
+  
+     webSocket.onopen = function(event) {
+      onOpen(event);
+	  
+     };
+     
+    webSocket.onclose = function(event) {
+       onClose(event);
+	   alert(event.data);
+    };
+  
+     webSocket.onmessage = function(event) {
+      onMessage(event)
+    }
+	
+    function onMessage(event) 
+	{
+	
+//	  $("#photo").attr('src','data:image/jpeg;base64,'+event);
+	var begin_data="data:image/jpeg;base64,";
+	document.getElementById('photo').src =begin_data+event.data;
+//	document.getElementById('result').value = event.data;
+//	document.getElementById('photo').src =event.data;
+       <!-- += '<br />' + event.data;-->
+	}
+	function onError(event)
+	{
+ //      alert(event.data);
+	}
+
+	function start(el) 
+	{
+	 
+       webSocket.send(el);
+       return false;
+	}
+	function vout_OnClick()
+	{
+		
+	}
+   </script>
+ </body>
+ </html>

@@ -1,0 +1,98 @@
+/**
+ *	  ___________  ______       __      ____      __
+ *	 /_  __/__  / / ___/ |     / /     / __ )    / /
+ *	  / /    / /  \__ \| | /| / /_____/ __  |_  / / 
+ *	 / /    / /_____/ /| |/ |/ /_____/ /_/ / /_/ /  
+ *	/_/    /____/____/ |__/|__/     /_____/\____/   
+ * 
+ * BJ-Web-Full
+ * Copyright (c) 2017-2018,浙江天正思维
+ * Developed by A Little Monkey.
+ * 劝君更尽一杯酒，西出阳关无故人。---《送元二使安西》
+ */
+package com.tzsw.bj.config;
+
+import com.jfinal.config.Constants;
+import com.jfinal.config.Handlers;
+import com.jfinal.config.Interceptors;
+import com.jfinal.config.JFinalConfig;
+import com.jfinal.config.Plugins;
+import com.jfinal.config.Routes;
+import com.jfinal.core.Const;
+import com.jfinal.ext.handler.ContextPathHandler;
+import com.jfinal.template.Engine;
+import com.tzsw.bj.core.BjConst;
+import com.tzsw.bj.core.web.interceptor.ExceptionInterceptor;
+import com.tzsw.bj.core.web.util.PluginHelp;
+import com.tzsw.bj.core.web.util.PropHelp;
+import com.tzsw.jfinal.ext.plugin.MyRoutesUtil;
+import com.zjtzsw.embed.util.httpcp.factory.PoolManagerFactory;
+
+/**
+ * API引导式配置 （COC原则）<br/>
+ * Convention Over Configuration
+ * 
+ * @author yuanzp
+ * @date 2017年10月24日 下午4:10:28
+ */
+public class WebAppConfig extends JFinalConfig {
+
+	/**
+	 * 配置常量
+	 */
+	public void configConstant(Constants me) {
+		// 初始化默认必要配置
+		me.setDevMode(PropHelp.webConfig.getBoolean("DEV_MODE", BjConst.DEFAULT_DEV_MODE));
+		PluginHelp.init();
+		me.setEncoding(Const.DEFAULT_ENCODING);
+		me.setReportAfterInvocation(false);
+	}
+
+	/**
+	 * 配置路由
+	 */
+	public void configRoute(Routes me) {
+		// 保护的资源不被直接访问
+		me.setBaseViewPath("/WEB-INF/views");
+		MyRoutesUtil.add(me);
+	}
+
+	public void configEngine(Engine me) {
+	}
+
+	/**
+	 * 配置插件
+	 */
+	public void configPlugin(Plugins me) {
+	}
+
+	/**
+	 * 配置全局拦截器
+	 */
+	public void configInterceptor(Interceptors me) {
+		me.add(new ExceptionInterceptor());
+	}
+
+	/**
+	 * 配置处理器
+	 */
+	public void configHandler(Handlers me) {
+		me.add(new ContextPathHandler());
+	}
+
+	/**
+	 * Call back after JFinal start
+	 */
+	public void afterJFinalStart() {
+		//初始化创建HttpClient连接池
+//		PoolManagerFactory.start();
+//		HttpClientService.start();
+	}
+
+	/**
+	 * Call back before JFinal stop
+	 */
+	public void beforeJFinalStop() {
+	}
+
+}

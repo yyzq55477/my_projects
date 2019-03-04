@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=IE8, chrome=1" />
+<title>盘库</title>
+<script type="text/javascript" charset="utf-8" src="lib/jquery/jquery.min.js?v=1.11.1"></script>
+<script type="text/javascript" charset="utf-8" src="lib/index.js?v=1.1.1"></script>
+<style type="text/css">
+table{
+	border-collapse: collapse;
+	margin-top: 15px;
+}
+tr, th, td{
+	border: 1px solid #ccc;
+}
+thead{
+	background: #eee;
+}
+thead th{
+	padding: 5px 0px;
+}
+tbody td{
+	padding: 0px 5px;
+}
+</style>
+</head>
+<body>
+	<h1>盘库</h1>
+	
+	<div class="console">
+		<input type="submit" id="submit"/>
+		<input type="text" id="inputCode"/>
+	</div>
+	
+	<table width="100%">
+		<thead>
+			<th>柜架号</th>
+			<th>档案</th>
+		</thead>
+		<tbody id="canvas"></tbody>
+	</table>
+	
+	<script type="text/javascript">
+		$(function() {
+			init({
+				inputCodeUrl : 'lib/data.json',
+				submitUrl : '',
+				itemScope : null
+			});
+			
+			$('#inputCode').keydown(function(e) {
+				 var keycode = (event.keyCode ? event.keyCode : event.which);
+				 if(keycode == '13'){
+				    sendCode($(this).val());
+				 }
+			});
+			
+			$('#submit').click(function(e) {
+				
+			});
+		});
+	</script>
+</body>
+</html>

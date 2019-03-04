@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html height = "100%" width = "100%">
+<head>
+<meta charset="UTF-8">
+<title>捷宇web高拍</title>
+
+<link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.min.css"></link>
+<script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="JY.js"></script>
+<script type="text/javascript" src="highshootTools.js"></script>
+<style>
+.mask {
+	position: absolute;
+	top: 0px;
+	filter: alpha(opacity = 60);
+	background-color: #000000;
+	z-index: 1002;
+	left: 0px;
+	opacity: 0.5;
+	-moz-opacity: 0.5;
+	width: 100%;
+	height: 100%;
+}
+</style>
+</head>
+ <body>
+<div>
+<div id="mask" class="mask" style="text-align: center; padding: 15%;display:none">
+			<div style="background-color:#C7EDCC;border:5px solid black; width: 200px;height:45px;line-height:35px;text-align: center;margin:0 auto;">
+			<span>请稍等...</span>
+			</div>
+		</div>
+ <img id="highshootPhoto" src = '../style/images/gaopaiyi.jpg' width = "100%" >
+</div>
+</body>
+</html>
+<script>
+window.onload=function (){
+	//用它爹的90%长度。正好没滚动条。美滋滋
+	document.getElementById('highshootPhoto').height = window.parent.paramFromParent.height * 0.90;	
+	setTimeout(function(){	//建立websocket连接有点慢，得稍等会再启动摄像头。
+		start('bStartPlay');
+	},300);  
+}
+
+//拍照并上传
+function picToUpload(){
+	var fileName =  getPicName();
+	start('bSaveJPG(D:\\highshoot\\,'+fileName+')');
+	var pathJson = getPath(fileName);
+	setTimeout(function(){
+		var bool = start('bUpLoadImage(D:\\highshoot\\'+fileName+'.JPG,'+pathJson.host+','+pathJson.port+','+pathJson.path+')');
+	},2000);
+	 doMask();
+	//这里比较操蛋了。上传是异步的操作。所以延迟刷新2S
+	setTimeout(function(){
+		window.parent.updateCateView();
+		window.parent.updateMaterialVersion();
+		 unMask();
+	},2000);	
+	
+}
+
+
+
+
+
+</script>

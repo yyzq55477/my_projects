@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>影像采集和查看器</title>
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"></link>
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap-icon.css"></link>
+<link rel="stylesheet" href="lib/jcrop/css/jquery.Jcrop.min.css"></link>
+<link rel="stylesheet" href="lib/jquery/jquery-slider.min.css"></link>
+<link rel="stylesheet" href="lib/uploadify/uploadify.css"></link>
+<link rel="stylesheet" href="lib/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css"></link>
+<link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css"></link>
+<link rel="stylesheet" href="lib/picasa/style/style.css"></link>
+
+<link rel="stylesheet" href="style/style2.css"></link>
+<style>
+body {
+	font-size: 12px !important;	
+}
+
+.side-btn {
+	display: block;
+	position: absolute;
+	top: 10px;
+	right: -16px;
+	width: 16px;
+	height: 19px;
+	border: 1px #CCC solid;
+	color: #5BC0DE;
+	cursor: pointer;
+	background: #FFF;
+}
+
+.side-btn:hover {
+	color: #31B0D5;
+}
+</style>
+</head>
+
+<body onbeforeunload="unloadHandler();">
+<div class="container-fluid">
+	<div class="clearfix" id="view">
+		<div class="content-wrap">
+			<!-- 列表视图 -->
+			<div id="listView">
+				<div class="guide">
+					<div class="side-btn"><i class="glyphicon pull-right"></i></div>
+					<div class="thumb"></div>
+					<ul class="operate">
+						<!-- <button class="btn btn-info btn-pic-remove" type="button">
+							<i class="icon-white icon-remove"></i>删除
+						</button> -->
+						<button class="btn btn-info btn-pic-viewall" type="button">
+							<i class="icon-white icon-search"></i><span>查看全部</span>
+						</button>
+					</ul>
+				</div>
+				<div id="dragWrap" class="content clearfix"></div>
+				<div id="fileInfo"></div>
+			</div>
+			<!-- 查看视图 -->
+			<div id="detailView">
+				<div class="guide">
+ 					<!-- <div class="side-btn"><i class="glyphicon pull-right"></i></div> -->
+					<ul class="operate">
+						<li><button class="btn btn-info shutdown" type="button"><i class="icon-white icon-off"></i>返回</button></li>
+						<!-- <li><button class="btn btn-info refresh" type="button"><i class="icon-white icon-refresh"></i>刷新</button></li> -->
+						<li><button class="btn btn-info buildpdf" type="button"><i class="icon-white icon-print"></i>装订成册下载</button></li>
+					</ul>
+					<button type="button" class="toUp"><i class='icon-chevron-up'></i></button>
+					<div class="thumb"></div>
+					<button type="button" class="toDown"><i class='icon-chevron-down'></i></button>
+				</div>
+				<div class="content clearfix"></div>
+			</div>
+			<!-- 编辑视图 -->
+			<div id="editView">
+				<div class="guide">
+ 					<!-- <div class="side-btn"><i class="glyphicon pull-right"></i></div> -->
+					<ul class="operate">
+						<li><button class="btn btn-info shutdown" type="button"><i class="icon-white icon-off"></i>返回（Shift+Q）</button></li>
+						<li>
+							<button class="btn btn-info refresh" type="button">
+								<i class="icon-white icon-refresh"></i>重新编辑（Shift+R）
+							</button>
+						</li>
+					</ul>
+					<div class="thumb">
+						<ul>
+							<li>
+								<label>图片名称</label>
+								<div class="input-group">
+								  	<input id="filename" class="form-control" type="text" name="" />
+								  	<span class="input-group-addon saveFilename" title="保存图片名称"><i class="icon-white icon-edit"></i></span>
+								</div>
+							</li>
+							<!-- <li><button class="btn btn-info crop" type="button"><i class="icon-white icon-move"></i>裁剪（Shift+C）</button></li> -->
+							<li><button class="btn btn-info rotate" type="button"><i class="icon-white icon-repeat"></i>旋转（Shift+D）</button></li>
+							<!-- <li><button class="btn btn-info correct" type="button"><i class="icon-white icon-retweet"></i>纠偏（Shift+E）</button></li> -->
+							<!-- <li>
+								<div class="slider clearfix">
+									<i class="icon-zoom-out pull-left"></i>
+									<i class="icon-zoom-in pull-right"></i>
+								</div>
+								<div id="slider"></div>
+							</li> -->
+							<li>
+								<div class="btn-group">
+									<button class="btn btn-default apply" type="button" data-x="" data-y="" data-w="" data-h="">预览<i>(Shift+A)</i></button>
+									<button class="btn btn-primary save" type="button">保存<i>(Shift+S)</i></button>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="content clearfix">
+					<table id="lineArea" width="100%" height="100%">
+						<tr><td align="center" valign="middle" id="targetWrap"></td></tr>
+					</table>
+					<div class="edit-top-bar" data-ratio="1">
+						<a class="enlarge" href="javascript:;" title="放大"><i class="icon-white icon-plus"></i></a>
+						<a class="narrow" href="javascript:;" title="缩小"><i class="icon-white icon-minus"></i></a>
+						<select>
+							<option value=""></option>
+							<option value="0.2">20%</option>
+							<option value="0.5">50%</option>
+							<option value="1">100%</option>
+							<option value="2">200%</option>
+						</select>
+						<a class="adaptive-wide" href="javascript:;" title="适合宽"><i class="icon-white icon-th-large"></i></a>
+						<a class="adative-height" href="javascript:;" title="适合高"><i class="icon-white icon-th"></i></a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="modal fade" id="modal-upload">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-body">
+				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+				<!-- 默认上传界面 -->
+				<div id="upload-default">
+					<ul class="clearfix">
+						<li class="highShoot"><img src='style/images/gaopaiyi.jpg' /><span>捷宇-高拍</span></li>
+						<li class="highShootDyp"><img src='style/images/gaopaiyi-dyp.jpg' /><span>德意拍-高拍</span></li>
+						<li class="highShootLt"><img src='style/images/gaopaiyi-dyp.jpg' /><span>良田-高拍</span></li>
+						<li class="nativeUpload"><img src='style/images/computer.jpg' /><span>本地上传</span></li>
+						<li class="basefile"><img src='style/images/usefile.jpg' /><span>浏览基础资料</span></li>
+					 	<li class="finance"><img src='style/images/usefile.jpg' /><span>浏览</span></li>
+						<li class="scanning"><img src='style/images/saomiaoyi.jpg' /><span>扫描</span></li> 
+					</ul>
+				</div>
+				<!-- 高拍界面 -->
+				<iframe id="high-shoot_f" class="upload-view" src="" width="100%" height="98%" frameborder="0"></iframe>
+				<!-- 浏览界面 -->
+				<div id="finance" class="upload-view">
+					<div class="form-inline">
+						<div class="form-group">
+							<label>关键字:</label>
+							<input class='form-control' type="text" name="finance" /> 
+						</div>
+						<button class="btn btn-primary finance-search" type="button">查询</button>
+					</div>
+					<ul class="clearfix"></ul>
+					<div class="upload-footer">
+						<button class="btn btn-primary finance-upload" type="button">引用</button>
+						<button class="btn btn-info back-to-default" type="button">返回</button>
+					</div>
+				</div>
+				<!-- 本地上传界面 -->
+				<div id="native-upload" class="upload-view">
+					<input id="native-file" type="file" name="file" multiple="true"/>
+					<div class="upload-footer">
+						<button class="btn btn-primary fileinput-upload" type="button">上传</button>
+						<button class="btn btn-info back-to-default" type="button">返回</button>
+					</div>
+				</div>
+				<!-- 扫描界面 -->
+				<iframe id="scanning_f" class="upload-view" src="" width="100%" height="100%" frameborder="0"></iframe>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+  Launch demo modal
+</button>
+
+<!--涂鸦 -->
+<div class="modal fade" id="painter" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="z-index:99999">
+<!--   <div class="modal-dialog" role="document" style="width:1000px;height:700px;"> -->
+    <div class="modal-content"  id = "paintContent">
+      <div class="modal-body"  style="width:100%;height:100%">
+        <iframe  style="width:100%;height:100%" id = "iframePaint"></iframe>
+      </div>
+    </div>
+<!--   </div> -->
+</div>
+
+<!-- 材料历史版本 -->
+<div class="modal fade" id="modal-history">
+	<div class="modal-dialog" style="width:900px">
+		<div class="modal-content">
+			<div class="modal-body" style="height:500px">
+				当前材料版本号：<span id="current-version"></span>
+				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+				<div id="modal-history-content" style="height:420px">
+					<iframe id="history-iframe" width="100%" height="96%" frameborder="1" style="border:1px solid #cccccc" scrolling="no" src="icv-history3.html"></iframe>
+				</div>
+				<div style="text-align:center;" id="history-btns">
+					<button class="btn btn-primary modal-history-ok" type="button">引用</button>
+					<button class="btn btn-info modal-history-cancel" type="button">取消</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 材料文件历史版本 -->
+<div class="modal fade" id="modal-item-history">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-body">
+				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+				<div id="modal-item-history-content"></div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 装订成册等待提示 -->
+<div class="modal fade" id="modal-build-pdf">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-body" style="height:60px">
+				<span>正在进行装订，耗时视图片数量和质量而定，请耐心等待...</span>
+				<!-- <div style="text-align:center;margin-top:20px;" id="history-btns">
+					<button class="btn btn-info build-cancel" type="button">取消</button>
+				</div> -->
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 分组中的添加分类面板 -->
+
+<div class="modal prompt-modal" id="modal-group">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+				<h4 class="modal-title" id="groupTitle">New message</h4>
+			</div>
+			<div class="modal-body clearfix">
+				<form name="groupForm" class="form-inline">
+					<div class='form-group input-wrap'>
+						<label>材料&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名称:</label>
+						<textarea id='categoryName' class='form-control prompt-input'></textarea>
+					</div>
+					 <div class="form-group number-wrap" id="numberOfMaterial">
+						<label>材料&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;份数:</label>
+						<input class='form-control prompt-input' type="text" id="materialNumber" /> 
+					</div> 
+					<div class="form-group date-group" id="materialTimeD">
+						<label class="control-label">材料制成时间:</label>
+						<div class="input-group date v1-datetime" data-date-format="yyyy-mm-dd">
+							<input class="form-control" style="width:260px" type="datetime" name="materialTime" id="materialTime" readonly="true" />
+							<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+						</div>
+					</div>
+					<div class='form-group'>
+						<label>备&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注:</label>
+						<input id='categoryName5' class='form-control prompt-input' type='text' />
+					</div>
+				</form>
+				<div class='btn-group'>
+					<button class='btn btn-primary category-save-edit'>保存</button>
+					<button class='btn btn-default' data-dismiss="modal">取消</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 分类名称修改 -->
+<div class="modal prompt-modal" id="modal-category">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+				<h4 class="modal-title">修改名称</h4>
+			</div>
+			<div class="modal-body clearfix">
+				<div class='input-wrap'><input class='form-control prompt-input' type='text' /></div>
+				<div class='btn-group'>
+					<button class='btn btn-primary category-edit-save'>保存</button>
+					<button class='btn btn-default' data-dismiss="modal">取消</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- viewFileCatelog查看面板 -->
+<div class="modal large-modal" id="view-file-catelog">
+	<div class="modal-dialog">
+		<div class="modal-content content-with-header">
+			<div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+				<h4 class="modal-title">档案详细信息</h4>
+			</div>
+			<div class="modal-body clearfix">
+				<iframe id="file-catalog-iframe"  src="" width="100%" height="100%" frameborder="0"></iframe>
+			</div>
+		</div>
+	</div>
+</div>
+<iframe id="printframe" class="hidden" src="" width="100%" height="100%" frameborder="0"></iframe>
+<!-- pdf容器 -->
+<div class="modal" id="pdf-container"></div>
+<div id="refreshing">loading......</div>
+<div id="showtip"></div>
+<div id="loading"><img src="style/images/loading.gif" /></div>
+
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/jquery/jquery-migrate.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="lib/handlebars/handlebars-v2.0.0.js"></script>
+<script type="text/javascript" src="lib/dragsort/jquery.dragsort-0.5.2.js"></script>
+<script type="text/javascript" src="lib/jcrop/js/jquery.Jcrop.min.js"></script>
+<script type="text/javascript" src="lib/jquery/jquery-slider.min.js"></script>
+<script type="text/javascript" src="lib/pdf/jquery.media.js"></script>
+<script type="text/javascript" src="lib/bootstrap-datetimepicker/bootstrap-datetimepicker.js"></script>
+<script type="text/javascript" src="lib/bootstrap-datetimepicker/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+<script type="text/javascript" src="lib/picasa/picasa.js"></script>
+
+<!-- uploadify -->
+<script type="text/javascript" src="lib/uploadify/jquery.uploadify.min.js"></script>
+
+<!-- scripts -->
+
+<script type="text/javascript" src="bin/icv-impl.js?v1.2"></script>
+<script type="text/javascript" src="bin/icv-sdk.js?v1.2"></script>
+<script type="text/javascript" src="bin/script3.js?v1.3"></script>
+<script type="text/javascript" src="tz.painter.js?v1.2"></script>
+<script type="text/javascript" src="tz.websocket.min.js?v1.2"></script>
+
+
+<script type="text/javascript">
+$(function(){
+	var icv = parent.icv == null ? parent._icv : parent.icv; 
+	if (icv) icv.ctloaded.call(icv, window);
+	init(parent.icv.getIcvConfig());
+	if (icv.complete && typeof(icv.complete)=='function') {
+		icv.complete();
+	}
+	
+	$('.v1-datetime').datetimepicker({
+		language : 'zh-CN',
+		weekStart : 1,
+		todayBtn : 1,
+		autoclose : 1,
+		todayHighlight : 1,
+		startView : 2,
+		minView : 2,
+		forceParse : 0
+	});
+	/*收缩展开边栏*/
+	var velocity=1000;
+	$('.side-btn').toggle(function(){
+		$(this).children('i').removeClass('glyphicon-chevron-left').addClass('glyphicon-chevron-right');
+		$(this).parent('.guide').animate({'left':'-40%'},velocity,function(){
+			$(this).css("width","0px");
+			$(this).css("left","0px");
+		});
+	},function(){
+		$(this).children('i').removeClass('glyphicon-chevron-right').addClass('glyphicon-chevron-left');
+		$(this).parent('.guide').css("width","43%");
+		$(this).parent('.guide').css("left","-43%");
+		$(this).parent('.guide').animate({'left':'0px'},velocity);
+	});
+	$('.side-btn').children('i').addClass('glyphicon-chevron-left');
+});
+
+
+function unloadHandler() {
+    // 取消窗口关闭时的监听事件  
+    // 取消窗口关闭时的监听事件  
+    document.getElementsByTagName("BODY")[0].onbeforeunload = null;  
+    var el = document.getElementById("high-shoot_f"); 
+    var e2 = document.getElementById("scanning_f"); 
+    if (el) {  
+    $('#high-shoot_f').attr('src','about:blank');
+            el.contentWindow.document.write('');  
+          // el.contentWindow.document.clear();  
+           var p = el.parentNode;  
+            p.removeChild(el);  
+            p.appendChild(el);  
+       } 
+    if (e2) {  
+    $('#scanning_f').attr('src','about:blank');
+        e2.contentWindow.document.write('');  
+       //e2.contentWindow.document.clear();  
+       	var p = e2.parentNode;  
+        p.removeChild(e2);  
+		p.appendChild(e2);  
+	}  
+   	return true;
+} 
+
+$('.btn-printBar').click(function(){
+	var fuid = filextApi.uuid;
+	var title = encodeURIComponent(filextApi.config.bizTitle);
+	//$('#printframe').attr('src','donePrintDABQ.jsp?title='+title+'&code='+fuid);
+	
+	var tempForm = document.createElement("form"); 
+	tempForm.id="tempForm1"; 
+	tempForm.method="post"; 
+	tempForm.action="donePrintDABQ.jsp"; 
+	tempForm.target="printframe";
+	var hideInput = document.createElement("input"); 
+	var hideInput1 = document.createElement("input"); 
+	hideInput.type="hidden";
+	hideInput.name="fuid";
+	hideInput.value= fuid; 
+	hideInput1.type="hidden";
+	hideInput1.name="title";
+	hideInput1.value= title;
+	tempForm.appendChild(hideInput1);
+	tempForm.appendChild(hideInput); 
+	document.body.appendChild(tempForm); 
+	tempForm.submit(); 
+	document.body.removeChild(tempForm);
+	
+	//window.open('donePrintDABQ.jsp?code='+fuid,'printframe');
+});
+
+function getBizTitle() {
+	return $('.thumbTable tr.thumbItem.active').data('title');
+}
+</script>
+</body>
+</html>
+

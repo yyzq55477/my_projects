@@ -1,0 +1,4 @@
+jdbcUrl = jdbc:mysql://120.79.149.205/jfinal_demo?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
+user = root
+password = zty66084
+devMode = true

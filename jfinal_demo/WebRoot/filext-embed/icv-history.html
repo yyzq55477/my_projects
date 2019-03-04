@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>影像采集和查看器</title>
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"></link>
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap-icon.css"></link>
+<link rel="stylesheet" href="lib/jcrop/css/jquery.Jcrop.min.css"></link>
+<link rel="stylesheet" href="lib/jquery/jquery-slider.min.css"></link>
+<link rel="stylesheet" href="lib/uploadify/uploadify.css"></link>
+<link rel="stylesheet" href="lib/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css"></link>
+<link rel="stylesheet" href="lib/picasa/style/style.css"></link>
+
+<link rel="stylesheet" href="style/style.css"></link>
+<style>
+#listView .thumb {
+top: 0px
+}
+</style>
+</head>
+
+<body>
+<div class="container-fluid">
+	<div class="clearfix" id="view">
+		<div class="content-wrap">
+			<!-- 列表视图 -->
+			<div id="listView">
+				<div class="guide">
+					<div class="thumb"></div>
+				</div>
+				<div id="dragWrap" class="content clearfix icv-history"></div>
+				<div id="fileInfo"></div>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="refreshing">loading......</div>
+<div id="showtip"></div>
+<div id="loading"><img src="style/images/loading.gif" /></div>
+
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="lib/handlebars/handlebars-v2.0.0.js"></script>
+<script type="text/javascript" src="lib/dragsort/jquery.dragsort-0.5.2.js"></script>
+<script type="text/javascript" src="lib/jcrop/js/jquery.Jcrop.min.js"></script>
+<script type="text/javascript" src="lib/jquery/jquery-slider.min.js"></script>
+<script type="text/javascript" src="lib/pdf/jquery.media.js"></script>
+<script type="text/javascript" src="lib/bootstrap-datetimepicker/bootstrap-datetimepicker.js"></script>
+<script type="text/javascript" src="lib/bootstrap-datetimepicker/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+<script type="text/javascript" src="lib/picasa/picasa.js"></script>
+<!-- uploadify -->
+<script type="text/javascript" src="lib/uploadify/jquery.uploadify.min.js"></script>
+<!-- scripts -->
+<script type="text/javascript" src="bin/icv-impl.js?v1.1"></script>
+<script type="text/javascript" src="bin/icv-sdk.js?v1.1"></script>
+<script type="text/javascript" src="bin/script.js?v1.3"></script>
+<script type="text/javascript" src="icv.js?v1.11"></script>
+<script type="text/javascript">
+	var id;				// 点击的材料主键
+	var cv;				// 当前使用的版本
+	var appcontext;		// 应用上下文
+	var isBase;			// 是否基础材料
+	var picasa;
+	
+	$(function() {
+		picasa = new Picasa();
+	});
+	
+	// 初始化环境
+	function initEnv(params) {
+		initParams(params);
+		initIcv();
+		initHistory();
+	}
+	
+	// 初始化参数
+	function initParams(params) {
+		id = params.id;
+		cv = params.cv;
+		appcontext = params.appcontext;
+		isBase = params.isBase;
+		if (picasa.inited) picasa.close();
+	}
+	
+	// 初始化ICV
+	function initIcv() {
+		icv.config.params = {
+			subjectType : "",
+			subjectKey : "",
+		};
+		icv.setupConfig({
+			appcontext : appcontext,
+			privilege : {
+				disableOperate : true,
+				disablePrint : true,
+				disableDownload : true,
+				disableUncategory : true,
+				enableVersion : true,
+				enableTime : true
+			},
+			nodeBranch : '',
+			watermarkCode : ''
+		});
+		
+		if (icv) icv.ctloaded.call(icv, window);
+	}
+	
+	function initHistory() {
+		var config = icv.getIcvConfig() || {};
+		filextApi = new FilextApi(config);
+		privilege = config.config.privilege || {};
+		initHistoryPage();
+	}
+	
+	function initHistoryPage(){
+		$('#refreshing').fadeIn();
+		
+		fetchHistoryData();	// 获取历史数据
+		initListView();		// 渲染列表页
+		setViewOnly();		// 只读
+		
+		setTimeout(function() {
+			$('#refreshing').fadeOut('slow');
+		}, 1000);
+	}
+	
+	function setViewOnly() {
+		$('#items').remove();
+		$('#listView .content li .operate').remove();
+		$('#listView .content .collection').remove();
+		$('.checkpic').remove();
+		$('.star').remove();
+		$('#listView .content li').hover(function(e) {
+			$('#listView .content li .title').show();
+		});
+		$('#listView ul li:first-child').click();
+		$(".badge-version").off('click');
+		/* 点击分类 */
+		$('li.thumbItem').off('click').click(function() {
+			$('#listView .thumbItem.active').removeClass('active');
+			$('li.thumbItem .icon-white').removeClass('icon-white');
+			$(this).addClass('active');
+			$(this).children('i').addClass('icon-white');
+			currentId = $(this).data('id');
+			updateContent();
+			$(".badge-item-version").off('click');
+		});
+		
+		if(privilege.enableGroup) $('.collection').hide();
+	}
+
+	function fetchHistoryData() {
+		rootJson = filextApi.viewMaterialHistory({ 'uuid':id,'isBase':isBase }).data || {};
+		initData = rootJson.children || [];
+		
+		rootJson.watermark = rootJson.watermark || '';
+
+		if (rootJson.fileSizeLimit)
+			filextApi.fileSizeLimit = rootJson.fileSizeLimit;
+		if (privilege.disableOperate == null && rootJson.allowEdit == false && rootJson.collection == true) {
+			privilege.disableOperate = true;
+		}
+		if(rootJson.enableGroup){
+			if(initData.length == 0 || (initData[0].code != null && initData[0].code != '')) 
+				privilege.enableGroup = true;
+		}
+		
+		pidMap[filextApi.uuid] = initData;
+		//获取分类数据
+		for(var i in initData) {
+			var uuid = initData[i].uuid;
+			var res = filextApi.getSubData(uuid);
+			pidMap[uuid] = filterCache(res.data) || [];
+			thumbPageMap[uuid] = {
+				'pageIndex' :　1,
+				'pageSize' : 10																																																									
+			};
+		}
+		generateIdMap();
+	}
+	
+	// 获取选中的材料主键
+	function getSelectedId() {
+		return $("#listView .thumb ul .active").data("id");
+	}
+	
+	// 获取选中的材料版本
+	function getSelectedVersion() {
+		return $("#listView .thumb ul .active").data("cv");
+	}
+</script>
+</body>
+</html>

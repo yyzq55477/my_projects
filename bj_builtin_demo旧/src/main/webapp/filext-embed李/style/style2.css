@@ -1,0 +1,849 @@
+html,body{
+	height: 100%;
+	user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	overflow: hidden;
+}
+ul{
+	padding: 0;
+}
+ul,li{
+	list-style: none;
+}
+img{
+	border: none;
+	outline: none;
+}
+a,a:hover,a:focus{
+	text-decoration: none;
+	color: #333;
+}
+.apply, .save{
+	padding-left: 4px;
+	padding-right: 4px;
+}
+.apply i, .save i{
+	font-style: normal;
+	font-size: 10px;
+}
+.container-fluid{
+	padding: 0;
+	width: 100%;
+	height: 100%;
+}
+#view{
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+#view .content-wrap{
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 100%;
+}
+#listView, #detailView, #editView{
+	height: 100%;
+}
+#detailView, #editView{
+	display: none;
+}
+.content{
+	height: 100%;
+	margin-right: 0px;
+	overflow: auto;
+}
+#listView .content ul{
+	margin-bottom: 25px;
+}
+#listView .content ul li{
+	width: 120px;
+	height: 120px;
+	float: left;
+	text-align: center;
+	margin: 15px;
+	border: 2px solid #e5e5e5;
+	position: relative;
+	padding: 8px;
+	background: #fff;
+	overflow: hidden;
+}
+#listView .content ul li.draggedItem{
+	padding: 2px;
+}
+#listView .content ul li.hover{
+	border: 2px solid #1B7ACC;
+}
+#listView .content ul li p{
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	white-space: nowrap;
+	margin-bottom: 0;
+	padding: 3px 0;
+	overflow: hidden;
+}
+#listView .content ul li.dragRegion{
+	background: yellow;
+}
+#listView .content ul li.collection p{
+	color: #1B7ACC;
+	font-weight: bold;
+	padding-bottom: 15px;
+}
+#listView .content li .operate{
+	font-size: 12px;
+	padding: 0;
+	display: none;
+}
+#listView .content li.collection .operate label{
+	margin-bottom: 0;
+}
+#listView .content li.item .operate{
+	background: #1B7ACC;
+	color: #fff;
+}
+#listView .content li.item .operate span{
+	display: inline-block;
+	width: 26%;
+	cursor: pointer;
+}
+#listView .content li.item .operate span:hover{
+	font-weight: bold;
+}
+#listView .content li.item .operate .line{
+	margin: 0 5px;
+}
+#listView .content ul li:hover .operate{
+	display: block;
+}
+#listView .content ul li:hover .title{
+	display: none;	
+}
+#listView .content ul li.draggedItem .operate{
+	display: none;
+}
+#listView .content ul li.draggedItem img{
+	width: 100%;
+}
+#fileInfo{
+	height: 30px;
+	line-height: 30px;
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	background: #ddd;
+	z-index: 33;
+	display: none;
+}
+#fileInfo p{
+	margin: 0;
+	padding: 0 20px;
+}
+#detailView .content{
+	background: #ccc;
+}
+#detailView .content ul{
+	display: block;
+	width: 90%;
+	margin: 0 auto;
+	position: relative;
+}
+#detailView .content ul li{
+	display: block;
+	width: 100%;
+	min-height: 54px;
+	margin: 30px auto;
+	background: #fff;
+	padding: 0 10px 10px;
+	box-shadow: 3px 3px 3px #999;
+    /* For IE 5.5 - 8 */
+    filter: progid:DXImageTransform.Microsoft.Shadow(color='#969696', Direction=135, Strength=5); 
+	overflow: hidden;
+	position: relative;
+}
+#detailView .content ul li .image-outline{
+	display: table;
+	margin: 0 auto;
+}
+#detailView .content ul li .title{
+	font-size: 16px;
+	text-align: center;
+	background: #eee;
+	border-bottom: 1px solid #ddd;
+	margin-left: -10px;
+	margin-right: -10px;
+}
+/*pdf*/
+#detailView .content .media{
+	margin: 0 auto;
+	margin-bottom: 40px\0;
+}
+#detailView .content .operate{
+	position: absolute;
+	width: 100%;
+	left: 0;
+	bottom: 0;
+	display: none;
+}
+#detailView .content .operate .btn-toolbar{
+	display: table;
+	background: #000;
+	opacity: 0.7;
+	filter:alpha(opacity=70);
+	padding: 8px 20px;
+	border-radius: 6px;
+	white-space: nowrap;
+	margin: 0 auto;
+}
+#editView .content{
+	position: relative;
+	padding-top: 35px;
+	background: url('images/grid-bg.png');
+}
+#editView .edit-top-bar{
+	width: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	background: #5bc0de;
+	text-align: center;
+	padding: 3px 0px;
+}
+#editView .edit-top-bar a, #editView .edit-top-bar select{
+	margin: 0px 5px;
+}
+.guide{
+	height: 100%;
+	border-right: 1px solid #ccc;
+	float: left;
+	position: relative;
+}
+#listView .guide{
+	width: 43%;
+}
+#detailView .guide, #editView .guide{
+	width: 250px;
+}
+.guide ul{
+	margin: 0;
+	position: relative;
+}
+.guide li{
+	margin: 10px;
+	margin-top: 0px;
+}
+.guide .operate{
+	position: absolute;
+	bottom: 0px;
+	width: 100%;
+	text-align: center;
+	padding-top: 8px;
+	border-top: 1px solid #ccc;
+}
+#listView .guide .operate{
+	height: 50px;
+}
+#detailView .guide .operate{
+	top: 0px;
+	height: 100px;
+}
+.guide ul li > .btn, #editView ul li .btn-group{
+	width: 100%;
+}
+.guide .operate li i{
+	margin-right: 8px;
+}
+#listView .guide .toHome{
+	display: none;
+}
+.thumb{
+	position: relative;
+}
+.thumb ul li{
+	cursor: default;
+}
+#listView .thumb{
+	padding: 10px 0;
+	position: absolute;
+	width: 100%;
+	top: -11px;
+	bottom: 50px;
+	overflow: auto;
+}
+#listView .thumbHandling {
+	position: absolute;
+	width: 100%;
+	top: 0;
+	bottom: 0;
+	overflow: auto;
+}
+#listView .thumb.with-view, #listView .thumb.with-save{
+	top: 99px;
+}
+#listView .thumb.with-view.with-save{
+	top: 143px;
+}
+#listView .thumb table tr{
+	border-bottom: 1px dashed #ddd;
+	padding: 6px 2px 6px 20px;
+	cursor: pointer;
+/* 	font-weight: bold; */
+	margin: 0;
+	position: relative;
+}
+#listView .thumb table tr .caret{
+	border-top: 4px solid transparent;
+	border-left: 4px solid;
+	border-bottom: 4px solid transparent;
+	position: absolute;
+	left: 10px;
+	top: 12px;
+}
+#listView .thumb table tr .star{
+	color: #f00;
+	font-weight: bold;
+	font-size: 18px;
+}
+#listView .thumb tr.active, #listView .thumb tr.active:hover, #listView .thumbHandling tr.active, #listView .thumbHandling tr.active:hover{
+	color: #fff;
+	background: #5BC0DE;
+	border-bottom: 1px solid #5BC0DE;
+}
+#listView .thumb tr:hover, #listView .thumb tr.hover, #listView .thumbHandling tr:hover, #listView .thumbHandling tr.hover{
+	color: #2491B2;
+	background: #ccc;
+	border-bottom: 1px solid #ccc;
+}
+#listView .thumb tr.active .badge, #listView .thumb tr:hover .badge, #listView .thumbHandling tr.active .badge, #listView .thumbHandling tr:hover .badge{
+/* 	background: #fff; */
+	color: #2491B2;
+}
+#listView .thumb tr .glyphicon{
+	display: none;
+	float: right;
+	position: relative;
+	top: 4px;
+	margin-left: 6px;
+}
+#listView .thumb tr .icon-edit{
+	margin-left: 5px;
+}
+#listView .thumb tr .icon-remove{
+	margin-left: 8px;
+}
+#listView .thumb tr.special-proof:hover .badge{
+	display: none;
+}
+#listView .thumb td.special-proof:hover .glyphicon, #listView .thumb td.viewThumbItem:hover .badge{
+	display: block;
+}
+#listView .thumb .add-wrap{
+	padding: 10px;
+}
+#listView .thumb .btn-add-category{
+	width: 100%;
+}
+#listView .thumb .input-wrap{
+	display: none;
+}
+#listView .thumb .input-wrap .btn-group{
+	margin: 10px 0 0 30px;
+}
+
+#listView .thumb{
+	padding: 10px 0;
+/* 	position: absolute; */
+	width: 100%;
+/* 	top: 55px; */
+	bottom: 0px;
+	overflow: auto;
+}
+#listView .thumb.with-view, #listView .thumb.with-save{
+	top: 99px;
+}
+#listView .thumb.with-view.with-save{
+	top: 143px;
+}
+#listView .thumb ul li{
+	border-bottom: 1px dashed #ddd;
+	padding: 6px 2px 6px 20px;
+	cursor: pointer;
+	font-weight: bold;
+	margin: 0;
+	position: relative;
+}
+#listView .thumb ul li .caret{
+	border-top: 4px solid transparent;
+	border-left: 4px solid;
+	border-bottom: 4px solid transparent;
+	position: absolute;
+	left: 10px;
+	top: 12px;
+}
+#listView .thumb ul li .star{
+	color: #f00;
+	font-weight: bold;
+	font-size: 18px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+#listView .thumb li.active, #listView .thumb li.active:hover, #listView .thumbHandling li.active, #listView .thumbHandling li.active:hover{
+	color: #fff;
+	background: #5BC0DE;
+	border-bottom: 1px solid #5BC0DE;
+}
+#listView .thumb li:hover, #listView .thumb li.hover{
+	color: #2491B2;
+	background: #ccc;
+	border-bottom: 1px solid #ccc;
+}
+#listView .thumb li.active .badge, #listView .thumb li:hover .badge{
+	background: #fff;
+	color: #2491B2;
+}
+#listView .thumb li .glyphicon{
+	display: none;
+	float: right;
+	position: relative;
+	top: 4px;
+	margin-left: 6px;
+}
+#listView .thumb li .icon-edit{
+	margin-left: 5px;
+}
+#listView .thumb li .icon-remove{
+	margin-left: 8px;
+}
+#listView .thumb li.special-proof:hover .badge{
+	display: none;
+}
+#listView .thumb li.special-proof:hover .glyphicon, #listView .thumb li.viewThumbItem:hover .badge{
+	display: block;
+}
+#listView .thumb .add-wrap{
+	padding: 10px;
+}
+#listView .thumb .btn-add-category{
+	width: 100%;
+}
+#listView .thumb .input-wrap{
+	display: none;
+}
+#listView .thumb .input-wrap .btn-group{
+	margin: 10px 0 0 30px;
+}
+
+#detailView .thumb{
+	position: absolute;
+	bottom: 0px;
+	top: 100px;
+	text-align: center;
+	overflow: hidden;
+}
+#detailView .thumb a{
+	display: block;
+	padding: 6px 0;
+	border: 2px solid transparent;
+}
+#detailView .thumb a:hover, #detailView .thumb a.hover{
+	border-color: #428BCA;
+}
+#detailView .guide .toUp, #detailView .guide .toDown{
+	width: 60px;
+	background: #000;
+	border: none;
+	opacity: 0.3;
+	filter:alpha(opacity=30);
+	color: #fff;
+	position: absolute;
+	left: 90px;
+	padding: 3px 0;
+	font-size: 20px;
+	text-align: center;
+	z-index: 22;
+	cursor: pointer;
+	display: none;
+}
+#detailView .guide .toUp:hover, #detailView .guide .toDown:hover{
+	opacity: 0.8;
+	filter:alpha(opacity=80);
+}
+#detailView .guide:hover .toUp, #detailView .guide:hover .toDown{
+	display: block;
+}
+#detailView .guide .toUp{
+	top: 100px;
+}
+#detailView .guide .toDown{
+	bottom: 0px;
+}
+#detailView .guide .toDown i{
+	position: relative;
+	top: 5px;
+}
+#editView .thumb ul li label{
+	padding-left: 5px;
+}
+#editView .thumb ul li .input-group-addon{
+	padding: 6px 0 6px 8px;
+	background: #428bca;
+	border-color: #357ebd;
+	color: #fff;
+	cursor: pointer;
+}
+#editView .thumb ul li .input-group-addon:hover{
+	background: #3071a9
+}
+#editView .thumb ul li i{
+	margin-right: 8px;
+}
+#editView .guide ul li .btn-group .btn{
+	width: 50%;
+}
+#editView .ui-slider .ui-slider-range{
+	background: #5BC0DE;
+}
+#editView .slider{
+	color: #5BC0DE;
+	font-size: 18px;
+}
+#slider{
+	margin: 8px 0 30px;
+}
+#loading{
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	text-align: center;
+	z-index: 99999;
+	background: #fff;
+	opacity: 0.6;
+	filter:alpha(opacity=60);
+	display: none;
+}
+#loading img{
+	vertical-align: middle;
+}
+#refreshing, #showtip{
+	display: table;
+	background: #000;
+	opacity: 0.6;
+	filter:alpha(opacity=60);
+	position: absolute;
+	top: 0px;
+	left: 40%;
+	padding: 5px 20px;
+	color: #fff;
+	border-radius: 30px;
+	z-index: 9999;
+	display: none;
+}
+.uploadify-button{
+	border: none;
+}
+#cate-search{
+	width: 95%;
+	height: 30px;
+	font-size: 12px;
+	padding: 6px;
+	margin: 0px auto 10px;
+}
+#accordion .panel{
+	border: none;
+	margin-bottom: 0px;
+}
+#accordion .catepanel .groupTitle{
+	font-family: '寰蒋闆呴粦';
+	font-size: 10pt;
+	background: #eee;
+	border: 1px solid #ddd;
+	border-color: #ddd #eee #eee #eee;
+	padding: 3px 20px 3px 3px;
+	cursor: pointer;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	position: relative;
+}
+#accordion .collapse .catepanel .groupTitle{
+	padding-left: 8px;
+}
+#accordion .catepanel .groupTitle.active{
+	background: #2491B2;
+	color: #fff;
+	border-color: #2491B2;
+}
+#accordion .collapse .catepanel .groupTitle.active{
+	background: #15A5D0;
+	border-color: #15A5D0;
+}
+#accordion .catepanel .groupTitle:hover, #accordion .catepanel .groupTitle.hover{
+	border-color: #2491B2;
+}
+#accordion .catepanel .groupTitle:hover button{
+	display: inline;
+}
+#accordion .catepanel .groupTitle.active:hover button{
+	background: #fff;
+	color: #2491B2;
+}
+#accordion .catepanel .groupTitle:hover .badge{
+	display: none;
+}
+#accordion .catepanel .groupTitle.groupsTitle:hover .badge{
+	display: inline-block;
+}
+#accordion .catepanel .groupTitle button{
+	width: 25px;
+	border: none;
+	border-radius: 25px;
+	color: #fff;
+	background: #2491B2;
+	font-weight: bold;
+  	text-align: center;
+  	cursor: pointer;
+  	position: absolute;
+  	top: 2px;
+	right: 0px;
+  	display: none;
+}
+#accordion .catepanel .groupTitle .badge{
+	position: absolute;
+	right: 1px;
+	background: #2491B2;
+	color: #fff;
+}
+#accordion .catepanel .groupTitle.active .badge{
+	background: #fff;
+	color: #2491B2;
+}
+abbr[title], abbr[data-original-title]{
+	cursor: pointer;
+	border-bottom: none;
+}
+#modal-upload .modal-dialog{
+	margin: 30px auto;
+}
+#modal-upload .modal-body{
+	padding: 20px;
+}
+#modal-upload .modal-body button.close{
+	position: absolute;
+	top: 3px;
+	right: 8px;
+}
+#upload-default ul{
+	margin-bottom: 0;
+}
+#upload-default li{
+	float: left;
+	width: 150px;
+	height: 150px;
+	border: 1px solid #ddd;
+	margin: 5px;
+	text-align: center;
+	cursor: pointer;
+	position: relative;
+	overflow: hidden;
+}
+#upload-default li:last-child{
+	margin-right: 0;
+}
+#upload-default li img{
+	max-width: 100%;
+}
+#upload-default li span{
+	display: block;
+	width: 100%;
+	text-align: center;
+	position: absolute;
+	bottom: 5px;
+	left: 0;
+}
+#finance ul{
+	margin: 15px 0px;
+}
+#finance li{
+	float: left;
+	width: 120px;
+	height: 140px;
+	margin: 5px;
+	cursor: pointer;
+	text-align: center;
+	overflow: hidden;
+}
+#finance li label{
+	display: block;
+}
+#finance li img{
+	width: 100%;
+}
+.upload-view{
+	display: none;
+}
+.upload-view .upload-footer{
+	text-align: center;
+}
+.prompt-modal .btn-group{
+	margin-top: 15px;
+	float: right;
+}
+/*modal*/
+.modal .modal-dialog{
+	width: 600px;
+}
+.large-modal .modal-dialog{
+	width: 80%;
+	height: 80%;
+}
+.large-modal .modal-content, .large-modal .modal-body{
+	width: 100%;
+	height:100%;
+}
+.large-modal .modal-content{
+	overflow: hidden;
+}
+.large-modal .modal-body{
+	box-sizing: border-box;
+	overflow: auto;
+}
+.large-modal .content-with-header{
+	padding-top: 47px;
+}
+.large-modal .modal-header{
+	position: absolute;
+	width: 100%;
+	top: 0px; 
+	left: 0px;
+}
+#modal-group .form-inline .form-group{
+	display: block;
+	margin: 10px 0px;
+}
+#modal-group .form-inline label{
+	margin-right: 15px;
+}
+#modal-group .form-inline .form-control{
+	width: 300px;
+}
+
+/* added by Lintel */
+/* #listView .thumb tr.active .badge-version, #listView .thumb tr:hover .badge-version, .badge-version {
+	color: white;
+	background: #b5b5b5;
+}
+#listView .thumb tr.active .base-material, #listView .thumb tr:hover .base-material, .base-material {
+	color: black;
+	background: #eead0e;
+} */
+.badge-item-version {
+	background: #b5b5b5;
+	position: absolute;
+	cursor: pointer;
+}
+.view-item-version {
+	background: #b5b5b5;
+	position: absolute;
+	right: 13px;
+}
+#modal-item-history-content ul li {
+	width: 120px;
+	height: 120px;
+	float: left;
+	text-align: center;
+	margin: 15px;
+	border: 2px solid #e5e5e5;
+	position: relative;
+	padding: 8px;
+	background: #fff;
+	overflow: hidden;
+}
+#modal-item-history-content ul li.hover {
+	border: 2px solid #1b7acc;
+}
+.thumbTable {
+	width: 100%;
+}
+.thumbTable td,.thumbTable th, .handlingTable td, .handlingTable th {
+	border: 1px dashed #ddd;
+	text-align: center;
+	height: 25px;
+}
+.handlingTable th {
+	border-top: 0 !important;
+}
+.thumbTable th, .handlingTable th  {
+	border: 1px solid #ddd;
+	height: 30px;
+}
+.checkpic {
+	display: none;
+}
+.load-more-wrap {
+	width: 100%;
+	text-align: center;
+	margin-bottom: 5px;
+}
+.materialTitle {
+	display:none;
+	font-size: 12px;
+	color: black;
+	width: 100%;
+	margin-left: 25px;
+}
+#items img {
+	width: 90%;
+	height: 90%;
+}
+#holder img {
+	height: 65%;
+}
+#pdf-container {
+	margin-left: 43%;
+}
+
+.progress span.text {
+    position: relative;
+    z-index: 10;
+}
+
+span.percentage {
+    width: 0;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: #1483d8;
+    position: absolute;
+}
+.progress {
+    border: 1px solid #1483d8;
+    width: 198px;
+    background: #fff;
+    height: 18px;
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    line-height: 20px;
+    color: #6dbfff;
+    position: relative;
+    margin: 10px 10px 0 0;
+}
+.progress span.percentage {
+    width: 0;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: #1483d8;
+    position: absolute;
+}
+.progress span.text {
+    position: relative;
+    z-index: 10;
+}

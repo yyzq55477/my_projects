@@ -1,0 +1,533 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"></link>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="bin/icv-sdk.js?v1.1"></script>
+<meta http-equiv="Cache-Control" content="no-store" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>天正影像系统</title>
+<style type="text/css">
+html, body {
+	width: 100%;
+	height: 100%;
+}
+
+#globeDiv {
+	width: 100%;
+	height: 100%;
+	min-height: 200px;
+	box-sizing: border-box;
+}
+
+.shoot {
+	position: absolute;
+	top: 0px;
+	height: 100%;
+	border: 1px solid #ccc;
+	margin: 5px
+}
+
+.imageDiv1 {
+	position: relative;
+	width: 120px;
+	height: 90px;
+	text-align: center;
+	margin: 2px;
+	cursor: pointer;
+}
+
+.btn {
+	margin: 5px;
+}
+
+.btn-toolbar, .form-inline {
+	margin-left: 15px;
+	margin-right: 15px;
+}
+
+.form-inline .form-group {
+	float: left;
+	width: 45%;
+	height: 30px;
+	margin-bottom: 20px;
+}
+
+.form-inline .control-label {
+	display: block;
+	width: 36%;
+	height: 30px;
+	line-height: 30px;
+	text-align: right;
+	float: left;
+}
+
+.form-inline .form-control {
+	display: block;
+	width: 200px;
+	margin-left: 10px;
+	float: left;
+}
+
+.btn-toolbar {
+	text-align: left;
+}
+
+.mask {
+	position: absolute;
+	top: 0px;
+	filter: alpha(opacity = 60);
+	background-color: #000000;
+	z-index: 1002;
+	left: 0px;
+	opacity: 0.5;
+	-moz-opacity: 0.5;
+	width: 100%;
+	height: 100%;
+}
+</style>
+<script type="text/javascript">
+	var strFile;
+	var notIE = typeof (dialogArguments) == 'undefined';
+	var localParent = notIE ? parent : dialogArguments;
+	var filextApi = localParent.filextApi;
+	var dir = new Date().getTime();
+	var fileNames = new Array();
+	var temp_dir = "c:\\";//图片暂存路径
+	var imgeType;
+	var d = new Date();
+	var str = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+	var savePath = "d:\\highshoot\\pic\\" + str;//+d.getHours()+"时"+d.getMinutes()+"分"+d.getSeconds()+"秒"+"\\";
+
+	$(function() {
+		var width = $(document).width();
+		var height = $(document).height();
+		var offset = notIE ? ($(localParent).height() - $("#operate").height() - 170)
+				: height - $("#operate").height();
+		$("#highshoot").height(offset - 10);
+		$("#operate").css("top", offset + "px");
+		$("#docMode").attr("checked", true);
+		
+		checkSavePath();
+		createFolder(savePath);
+	});
+	function setPicName()
+	{
+		var date=new Date();
+		var yy=date.getFullYear().toString();
+		var mm=(date.getMonth()+1).toString();
+		var dd=date.getDate().toString();
+		var hh=date.getHours().toString();
+		var nn=date.getMinutes().toString();
+		var ss=date.getSeconds().toString();
+		var mi=date.getMilliseconds().toString();
+		var picName=yy+mm+dd+hh+nn+ss+mi;
+		return picName;
+	}
+	function initialize() {
+        opendevice();
+}
+
+function opendevice() {
+	CaptureOcx.OpenDevice(0);
+	CaptureOcx.StartPlayDevice(0);    
+	CaptureOcx.TickAutoFocus(0);
+	getResolutionInfo();
+}
+
+function closecamera(){
+	if (CaptureOcx.IsDeviceOpened(0)) {
+		CaptureOcx.CloseDevice(0);
+	}
+}
+function checkSavePath(){
+	var fso = new ActiveXObject("Scripting.FileSystemObject");
+	if(!fso.FolderExists("d:\\")){
+		savePath = "c:\\highshoot\\pic\\"+str;
+	}
+}
+
+function createFolder(folderPath){
+	var fso = new ActiveXObject("Scripting.FileSystemObject");
+	var arr = [];
+	var paths=folderPath;
+	while(true){
+		if(fso.FolderExists(paths)){
+			if(arr.length > 0){
+				for(var i = arr.length;i > 0;i--){
+					fso.CreateFolder(arr[i-1]);
+				}
+			}
+			break;
+		}else{
+			arr.push(paths);
+			paths = getParent(paths);
+		}
+	}
+}
+
+function ParentFileExists(path){
+	var fso = new ActiveXObject("Scripting.FileSystemObject");
+	return fso.FolderExists(getParent(path));
+}
+
+function getParent(path){
+	var index = path.lastIndexOf("\\");
+	var str = path.substring(0,index);
+	return str;
+}
+
+//设置分辨率
+function SetResolution(e) {
+	var index = e.text;
+	var txt=e.options[e.options.selectedIndex].value;
+	CaptureOcx.SetDeviceFormatIndex(0,txt);
+}
+
+function shot(){
+	CaptureOcx.SetJpegQuality(1);
+	
+	var fso = new ActiveXObject("Scripting.FileSystemObject");
+	if (!fso.FolderExists(savePath)) {
+		fso.CreateFolder(savePath);
+	}
+	var imgPath = savePath+"\\"+setPicName()+".jpg";
+	CaptureOcx.GrabToFile(imgPath);
+    
+    if (CaptureOcx.GetDeviceBarcode(0)) {
+        var nCount = CaptureOcx.GetBarcodeCount();
+        var szType, szText;
+        for (var i = 0; i < nCount; i++) {
+            szType = CaptureOcx.GetBarcodeTypeName(i);
+            szText = CaptureOcx.GetBarcodeContent(i);
+            BarcodeText.value += szType + ": " + szText + "\r\n";
+        }
+    }
+    if (CaptureOcx.GetDeviceQRcode(0)) {
+        var nCount = CaptureOcx.GetQRcodeCount();
+        var szType, szText;
+        for (var i = 0; i < nCount; i++) {
+            szType = CaptureOcx.GetQRcodeTypeName(i);
+            szText = CaptureOcx.GetQRcodeContent(i);
+            QRcodeText.value += szType + ": " + szText + "\r\n";
+        }
+    }
+    cap.AddImage(imgPath);
+}
+
+function deleteImage() {
+	var str = cap.RemoveItemImg(-1, 1);
+}
+
+function UpdataFile(){
+	doMask();
+	setTimeout(function() {
+		var num = cap.GetListCount();
+		//var imageSelects = document.getElementsByName("imageSelect");
+		if (num == 0) {
+			alert('请先拍照！');
+			unMask();
+			return;
+		} else {
+			for (var i = 0; i < num; i++) {
+				var b = cap.GetCheck(i);
+				if(true) {
+					var file = cap.GetItemPath(i);
+					fileNames.push(file);
+				}
+			}
+		}
+		if (localParent.isReplace) {
+			uploadReplace();
+		} else {
+			uploadNew();
+		}
+		back();
+	},500);
+}
+
+function back() {
+	unMask();
+	closecamera();
+	window.close();
+}
+
+function uploadReplace() {
+	var file = fileNames[fileNames.length - 1];
+	//"d:\\/1464872236390.jpg"
+	var fileInfo = filextApi.getFilename(file.replace("/", ""));
+
+	var config = localParent.replaceData;
+	var data = {
+		node : filextApi.getNodeX(config.node),
+		uuid : config.uuid,
+		method : 'putStorageContent',
+		local : "",
+		uuidExt : fileInfo[2]
+	};
+
+	if (filextApi.getWatermark() != null) {
+		data.watermark = filextApi.getWatermark();
+	}
+
+	var path = filextApi.WEB_APP + '/filext-api?local=true&replace=true&watermark='
+			+ encodeURIComponent(data.watermark) + '&node=' + data.node
+			+ '&uuidExt=' + data.uuidExt + '&uuid=' + data.uuid
+			+ '&method=' + data.method + '&local=' + data.local;
+	var host = window.location.host;
+	var port = host.split(":")[1];
+	host = host.split(":")[0];
+	var url = "http://" +host+":"+port+path;
+	var ResultData = CaptureOcx.HttpPostFile(url,file, "");
+	var result = filextApi.commonCall({
+		data : {
+			method : 'updateStorageObject',
+			uuid : config.uuid,
+			uuidExt : fileInfo[2],
+			filename : fileInfo[0],
+			title : fileInfo[1],
+			filesize : file.filesize,
+			highshot : true
+		}
+	});
+	localParent.updateAfterUpload(result.success);
+}
+
+function uploadNew() {
+	var res = 1;
+	for ( var i in fileNames) {
+		uploadPhotoFile(fileNames[i], 8000);
+	}
+
+	if (res == 1) {
+		localParent.updateAfterUpload(true);
+	} else {
+		localParent.updateAfterUpload(false);
+	}
+}
+
+function uploadPhotoFile(photoName, filesize) {
+	var config = {
+		uuid : localParent.currentId,
+		filename : photoName,
+		filesize : filesize
+	};
+	var res = filextApi.requestBeforeUpload(config);
+	if (filextApi.getWatermark() != null) {
+		res.watermark = filextApi.getWatermark();
+	}
+	var path = filextApi.WEB_APP + '/filext-api?local=true&watermark='
+			+ encodeURIComponent(res.watermark) + '&node=' + res.node
+			+ '&uuidExt=' + res.uuidExt + '&uuid=' + res.uuid + '&method='
+			+ res.method; 
+	//var path = 	filextApi.WEB_APP +'/business/ac01/test'
+	var host = window.location.host;
+	var port = host.split(":")[1] || '80';
+	host = host.split(":")[0];
+	var url = "http://" +host+":"+port+path;
+	var ResultData = CaptureOcx.HttpPostFile(url,photoName, "");
+	return res;
+}
+
+function doMask(){
+	$("#highshoot").hide();
+//		$("#mask").show();
+    $("#mask").fadeTo(350,0.5);  
+	/* setTimeout(function() {
+		$("#mask").hide();
+		$("#highshoot").show();
+	},4000); */
+}
+
+function unMask(){
+	$("#highshoot").show();
+	$("#mask").hide();
+}
+
+function moveup() {
+	var num = cap.GetListCount();
+	for (var i = 0; i < num; i++) {
+		var b = cap.GetCheck(i);
+		if (b == 1) {
+			cap.ImageRiseEx();
+		}
+	}
+}
+
+function movedown() {
+	var num = cap.GetListCount();
+	for (var i = 0; i < num; i++) {
+		var b = cap.GetCheck(i);
+		if (b == 1) {
+			cap.ImageFallEx();
+		}
+	}
+}
+
+function getResolutionInfo(){	
+	var nFormatCount = CaptureOcx.GetDeviceFormatCount(0);
+	for(var i = 0 ; i < nFormatCount ; i++ )
+	{   
+		var szFormatName = CaptureOcx.GetDeviceFormatName(0, i);
+		$("#exposure").append("<option value='"+i+"'>"+szFormatName+"</option>");
+    }
+	$("#exposure option[value=2]").attr("selected", true);
+	CaptureOcx.SetDeviceFormatIndex(0,2);
+}
+
+function leftRotate() {
+	var num = cap.GetListCount();
+	var count = new Array();
+	;
+	for (var i = 0; i < num; i++) {
+		var b = cap.GetCheck(i);
+		if (b == 1) {
+			count.push(i);
+			//cap.ImageRotate(i, -90);
+		}
+	}
+	if (count.length == 0) {
+		alert("请选择左转的图像");
+	} else {
+		for ( var i in count) {
+			cap.ImageRotate(count[i], -90);
+			cap.SetCheck(count[i]);
+		}
+	}
+}
+
+function rightRotate() {
+	var num = cap.GetListCount();
+	var count = new Array();
+	;
+	for (var i = 0; i < num; i++) {
+		var b = cap.GetCheck(i);
+		if (b == 1) {
+			count.push(i);
+			//cap.ImageRotate(i, 90);
+			//cap.SetCheck(i);
+		}
+	}
+	if (count.length == 0) {
+		alert("请选择右转的图像");
+	} else {
+		for ( var i in count) {
+			cap.ImageRotate(count[i], 90);
+			cap.SetCheck(count[i]);
+		}
+	}
+}
+
+//设置模式
+function setMode(el) {
+	var value = el.value;
+	if (value == 1) {//文档读取类型
+		CaptureOcx.SetDeviceDeskewSetting(0, 0, 1, 0, 1, 0, 0, 0, 0);
+		 CaptureOcx.SetDeviceDeskew(0, false);
+		 CaptureOcx.SetDeskewPreview(false);
+	} else if (value == 2) {//自动寻边
+		 CaptureOcx.SetDeviceDeskewSetting(0, 0, 1, 0, 1, 0, 0, 0, 0);
+		 CaptureOcx.SetDeviceDeskew(0, true);
+		 CaptureOcx.SetDeskewPreview(true);
+	}
+}
+
+//去底色
+function RemoveBackColor(obj){
+	 
+	CaptureOcx.SetColorMode(3);
+}
+//弹出设置摄像头属性值的窗口
+function setup() {
+	CaptureOcx.ShowDevicePages(0);
+}
+</script>
+</head>
+<body onload="initialize()">
+
+	<div id="globeDiv">
+		<div id="mask" class="mask"
+			style="text-align: center; padding: 15%; display: none">
+			<!-- 			<img alt="" src="style/images/timg.gif"> -->
+			<div
+				style="background-color: #C7EDCC; border: 5px solid black; width: 200px; height: 45px; line-height: 35px; text-align: center; margin: 0 auto;">
+				<span>请稍等...</span>
+			</div>
+		</div>
+		<div id="highshoot" style="position: absolute; width: 100%; top: 0px;">
+			<div class="shoot"
+				style="text-align: center; left: 0px; right: 200px">
+				<object id="CaptureOcx"
+					classid="CLSID:30516390-004F-40B9-9FC6-C9096B59262E"
+					style="width: 100%; height: 100%;"></object>
+			</div>
+			<div id="imageDiv" class="shoot" style="width: 180px; right: 0px">
+				<!--[if gte IE 7]>     
+		        <object classid="clsid:8622e61a-22d1-4c10-9ecc-4dfc1f9a4f03" id="cap" width="100%" height="100%" ></object>
+				<![endif]-->
+				<!--[if !IE]> -->
+				<object type="application/x-itst-activex"
+					clsid="{8622e61a-22d1-4c10-9ecc-4dfc1f9a4f03}" id="cap"
+					width="100%" height="100%"></object>
+				<!-- <![endif]-->
+			</div>
+		</div>
+
+		<div id="operate" align="center"
+			style="position: absolute; width: 100%; height: 80px;">
+			<form method="POST" action="--WEBBOT-SELF--" name="form1" id="form1"
+				class="form-inline clearfix" name="Reso">
+				<input type="hidden" id="viewImagePath" /> <input type="hidden"
+					id="rotationNum" /> <input type="hidden" id="isSelectAll" />
+				<div class="btn-toolbar">
+					<label><input type="radio" id="docMode" value="1"
+						name="mode" onclick="setMode(this)" checked="checked">文档</label> <label><input
+						type="radio" id="certMode" value="2" name="mode"
+						onclick="setMode(this)">自动寻边</label> 
+						<label><input 
+						type="checkbox" value="" onclick="RemoveBackColor(this)">去底色</label>
+					<input class="btn btn-primary" type="button" value="拍照"
+						onclick="shot()"> <input class="btn btn-success"
+						type="button" value="保存" onClick="UpdataFile();" /> <input
+						class="btn btn-danger" type="button" value="删除"
+						onclick="deleteImage()" /> <input class="btn btn-primary"
+						type="button" value="前移" onclick="moveup()" /> <input
+						class="btn btn-danger" type="button" value="后移"
+						onclick="movedown()" /> <input class="btn btn-primary"
+						type="button" value="左转" onclick="leftRotate()" /> <input
+						class="btn btn-danger" type="button" value="右转"
+						onclick="rightRotate()" />
+					<!-- <input class="btn btn-info" type="button" value="返回" onClick="back();" /> -->
+				</div>
+				<div>
+					<div class="panel panel-default" style="margin-bottom: 0px">
+						<div class="panel-heading">
+							<h4 class="panel-title">
+								<a data-toggle="collapse" href="#setting">高级</a>
+							</h4>
+						</div>
+						<div id="setting" class="panel-collapse collapse">
+							<div class="panel-body">
+								<div class="form-group">
+									<label class="control-label">分辨率: </label> <select
+										class="form-control" style="width: 130px" id="exposure"
+										onchange="SetResolution(this)">
+									</select>
+								</div>
+								<div class="form-group">
+									<input class="btn btn-primary" type="button" value="参数设置"
+										onclick="setup()" />
+									<!-- 									<input class="btn btn-primary" type="button" value="分辨率" onclick="pin()" /> -->
+								</div>
+								<div style="clear: both;"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</body>
+</html>

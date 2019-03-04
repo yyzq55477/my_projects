@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html height = "100%" width = "100%">
+<head>
+<meta charset="UTF-8">
+<title>良田web高拍</title>
+
+<link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.min.css"></link>
+<script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="LT.js"></script>
+<script type="text/javascript" src="highshootTools.js"></script>
+<script type="text/javascript" src="lib/qwebchannel.js"></script>
+
+<style>
+.mask {
+	position: absolute;
+	top: 0px;
+	filter: alpha(opacity = 60);
+	background-color: #000000;
+	z-index: 1002;
+	left: 0px;
+	opacity: 0.5;
+	-moz-opacity: 0.5;
+	width: 100%;
+	height: 100%;
+}
+</style>
+</head>
+ <body>
+<div>
+<div id="mask" class="mask" style="text-align: center; padding: 15%;display:none">
+			<div style="background-color:#C7EDCC;border:5px solid black; width: 200px;height:45px;line-height:35px;text-align: center;margin:0 auto;">
+			<span>请稍等...</span>
+			</div>
+		</div>
+					<select id="devList" style="width: 120px;display:none" ></select> 
+		
+ <img id="highshootPhoto" src = '../style/images/gaopaiyi.jpg' width = "100%" >
+</div>
+<input type="hidden" id="shot"/>
+</body>
+</html>
+<script>
+window.onload=function (){
+	//用它爹的90%长度。正好没滚动条。美滋滋
+	document.getElementById('highshootPhoto').height = window.parent.paramFromParent.height * 0.90;	
+	setTimeout(function(){	//建立websocket连接有点慢，得稍等会再启动摄像头。
+		openSocket();
+		//dialog.get_actionType("openVideo");
+	},1000); 
+}
+
+var configValue = null;
+//拍照并上传
+function picToUpload(){
+	var fileName =  getPicName();
+	//start('bSaveJPG(D:\\highshoot\\,'+fileName+')');
+	var pathJson = getPath(fileName);
+	setTimeout(function(){
+		configValue = "set_httpUrl:"　+ pathJson.url;
+		document.getElementById("shot").click();
+		/* dialog.set_configValue(configValue);
+		dialog.photoBtnClicked("single");
+		dialog.get_actionType("savePhoto"); */
+	},200);
+	doMask();
+	//这里比较操蛋了。上传是异步的操作。所以延迟刷新2S
+	setTimeout(function(){
+		window.parent.updateCateView();
+		window.parent.updateMaterialVersion();
+		unMask();
+	},1000);		
+}
+
+
+//关闭
+function closeSocket(){
+	window.dialog = channel.objects.dialog;		
+	dialog.get_actionType("closeSignal");
+	var img = document.getElementById('highshootPhoto');				
+	img.src = "";
+	socket.close();
+	socket = null;
+}
+
+function openSocket() {		
+	var baseUrl = "ws://127.0.0.1:12345";
+	socket = new WebSocket(baseUrl);
+    socket.onclose = function()
+    {
+        console.error("web channel closed");
+    };
+    socket.onerror = function(error)
+    {
+        console.error("web channel error: " + error);
+    };
+	socket.onopen = function()
+    {
+        new QWebChannel(socket, function(channel) {
+            //获取c++注册对象
+            window.dialog = channel.objects.dialog;
+			//网页关闭函数
+			window.onunload = function() {
+				dialog.get_actionType("closeSignal");
+			}
+		/* 	//断开按钮点击
+			 document.getElementById("btnDisConnect").onclick = function() {
+				window.dialog = channel.objects.dialog;		
+				dialog.get_actionType("closeSignal");
+				var img = document.getElementById('big');				
+				img.src = "";
+				socket.close();
+				socket = null;	
+			};  */
+			
+			
+			
+			//拍照按钮点击
+			document.getElementById("shot").onclick = function() {
+				dialog.set_configValue(configValue);
+				dialog.photoBtnClicked("single");
+				dialog.get_actionType("savePhoto");
+			};
+			
+			//接收设备名(在设备列表中添加或删除item)
+			dialog.send_devName.connect(function(message) {							
+				
+            });
+									
+			//接收设备分辨率，若为空，则清空现有列表
+			dialog.send_resolutionList.connect(function(message) {
+				
+            });
+			
+			//接收设备出图模式，若为空，则清空现有列表
+			dialog.send_modelList.connect(function(message) {
+				/* if(message)
+				{
+					var select = document.getElementById("subtypeList");
+					if(message.indexOf("MJPG") >= 0)//默认mjpg
+					{
+						select.add(new Option(message),0);
+						select.selectedIndex=0;
+					} else{
+						select.add(new Option(message));
+					}
+				} else{
+					var select = document.getElementById("subtypeList");
+					select.options.length = 0;
+				} */
+            });
+			//服务器返回消息
+            dialog.sendPrintInfo.connect(function(message) {
+            	if(message.indexOf('savePhoto_success')){
+            		window.parent.updateCateView();
+            		window.parent.updateMaterialVersion();
+            		unMask();
+            	}
+            });
+			//接收图片流用来展示，多个，较小的base64
+			dialog.send_imgData2.connect(function(message) {
+				changeImgdata(message);	
+            });
+			//接收图片流用来展示，单个，较大的base64
+			dialog.send_imaData3.connect(function(message) {
+				photographData = message;						
+            });
+			//网页加载完成信号
+			dialog.html_loaded("one");
+			dialog.devChanged('S920A3');
+			dialog.get_actionType("openVideo");
+			dialog.set_configValue('set_autoUpload:true');
+        });
+    }
+}
+</script>

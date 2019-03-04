@@ -1,0 +1,669 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"></link>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="bin/icv-sdk.js?v1.1"></script>
+<meta http-equiv="Cache-Control" content="no-store" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>天正影像系统</title>
+<style type="text/css">
+html, body {
+	width: 100%;
+	height: 100%;
+}
+
+#globeDiv {
+	width: 100%;
+	height: 100%;
+	min-height: 200px;
+	box-sizing: border-box;
+}
+
+.shoot {
+	position: absolute;
+	top: 0px;
+	height: 100%;
+	border: 1px solid #ccc;
+	margin: 5px
+}
+
+.imageDiv1 {
+	position: relative;
+	width: 120px;
+	height: 90px;
+	text-align: center;
+	margin: 2px;
+	cursor: pointer;
+}
+
+.btn {
+	margin: 5px;
+}
+
+.btn-toolbar, .form-inline {
+	margin-left: 15px;
+	margin-right: 15px;
+}
+
+.form-inline .form-group {
+	float: left;
+	width: 45%;
+	height: 30px;
+	margin-bottom: 20px;
+}
+
+.form-inline .control-label {
+	display: block;
+	width: 36%;
+	height: 30px;
+	line-height: 30px;
+	text-align: right;
+	float: left;
+}
+
+.form-inline .form-control {
+	display: block;
+	width: 200px;
+	margin-left: 10px;
+	float: left;
+}
+
+.btn-toolbar {
+	text-align: left;
+}
+
+.mask {
+	position: absolute;
+	top: 0px;
+	filter: alpha(opacity = 60);
+	background-color: #000000;
+	z-index: 1002;
+	left: 0px;
+	opacity: 0.5;
+	-moz-opacity: 0.5;
+	width: 100%;
+	height: 100%;
+}
+</style>
+<script type="text/javascript" for="CmCaptureOcx"
+	event="GetImageFileName(fileName);">
+	CmCaptureOcx.AddPDFImageFile(fileName);
+</script>
+
+<script type="text/javascript">
+	var notIE = typeof (dialogArguments) == 'undefined';
+	var localParent = notIE ? parent : dialogArguments;
+	var filextApi = localParent.filextApi;
+	var dir = new Date().getTime();
+	var fileNames = new Array();
+	var temp_dir = "c:\\";//图片暂存路径
+	var imgeType;
+	var d = new Date();
+	var str = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+	var savePath = "d:\\highshoot\\pic\\" + str;//+d.getHours()+"时"+d.getMinutes()+"分"+d.getSeconds()+"秒"+"\\";
+
+	var nFileCount = 0;
+	var bAdjustMode = 0;
+	var bCropArea = 0;
+	var bSetDenoise = 0;
+	var Width = 0;
+	var Height = 0;
+	var strFile;
+	var strFileName;
+	var index = 1;
+	var strCardFile;
+	var cardIndex = 0;
+	
+	var photoFiles = [];
+	$(function() {
+		var width = $(document).width();
+		var height = $(document).height();
+		var offset = notIE ? ($(localParent).height() - $("#operate").height() - 170)
+				: height - $("#operate").height();
+		$("#highshoot").height(offset - 10);
+		$("#operate").css("top", offset + "px");
+		$("#certMode").attr("checked", true);
+		if(typeof JSON == 'undefined'){ 
+	　　		$('head').append($("<script type='text/javascript' src='bin/json2.js'/>"));  //此处的位置为该js文件所在路径
+	　　	}
+		/* var h = document.getElementById("CaptureOcx").offsetHeight; */ //不知道什么作用,先注释了--fhn
+		setTimeout(function(){
+			checkSavePath();
+			createFolder(savePath);
+		},200);
+	});
+	function setPicName()
+	{
+		var date=new Date();
+		var yy=date.getFullYear().toString();
+		var mm=(date.getMonth()+1).toString();
+		var dd=date.getDate().toString();
+		var hh=date.getHours().toString();
+		var nn=date.getMinutes().toString();
+		var ss=date.getSeconds().toString();
+		var mi=date.getMilliseconds().toString();
+		var picName=yy+mm+dd+hh+nn+ss+mi;
+		return picName;
+	}
+function initialize() {
+        opendevice();
+}
+
+$(document).ready(function() {
+	imgeType = document.getElementById("FileType");
+	var obj = document.getElementById("Resolution");	
+});
+//打开驱动
+function opendevice() {
+	try{
+		CmCaptureOcx.Initial();
+		CmCaptureOcx.AutoCrop(1);
+		AddDevice();
+		StartVideo();
+	}catch(e){
+		alert("err:"+e.message);
+		 if(confirm("未安装高拍控件，确定要下载安装?")){
+			 window.location.href=filextApi.WEB_APP+"/filext-embed/control/CmCaptureOcx_Unis_V1.1.9_20140325.exe";	
+		 }
+	}	
+}
+//关闭相机
+function closecamera(){
+	/* CaptureOcx.ReleaseDevice(0);
+	CaptureOcx.StopDevice(0); */
+	alert("closecamera");
+}
+function checkSavePath(){
+	var fso = new ActiveXObject("Scripting.FileSystemObject");
+	if(!fso.FolderExists("d:\\")){
+		savePath = "c:\\highshoot\\pic\\"+str;
+	}
+}
+
+function createFolder(folderPath){
+	var fso = new ActiveXObject("Scripting.FileSystemObject");
+	var arr = [];
+	var paths=folderPath;
+	while(true){
+		if(fso.FolderExists(paths)){
+			if(arr.length > 0){
+				for(var i = arr.length;i > 0;i--){
+					fso.CreateFolder(arr[i-1]);
+				}
+			}
+			break;
+		}else{
+			arr.push(paths);
+			paths = getParent(paths);
+		}
+	}
+}
+
+function ParentFileExists(path){
+	var fso = new ActiveXObject("Scripting.FileSystemObject");
+	return fso.FolderExists(getParent(path));
+}
+
+function getParent(path){
+	var index = path.lastIndexOf("\\");
+	var str = path.substring(0,index);
+	return str;
+}
+//拍照
+function shot(){	
+	var obj=document.getElementById("FileType") ;
+	var index=obj.selectedIndex;
+	strFile = savePath+"\\"+setPicName();
+	if(index == 0)
+	{
+		strFile += ".bmp";
+	}
+	if(index == 1)
+	{
+		strFile += ".jpg";
+	}
+	if(index == 2)
+	{
+		strFile += ".tif";
+	}
+	if(index == 3)
+	{
+		strFile += ".png";
+	}
+	CmCaptureOcx.CaptureImage(strFile);
+    cap.AddImage(strFile);//加入右侧预览
+}
+//删除文件
+function deleteImage() {
+	var str = cap.RemoveItemImg(-1, 1);
+}
+//上传文件
+function UpdataFile(){
+	doMask();
+	setTimeout(function() {
+		var num = cap.GetListCount();
+		//var imageSelects = document.getElementsByName("imageSelect");
+		if (num == 0) {
+			alert('请先拍照！');
+			unMask();
+			return;
+		} else {
+			for (var i = 0; i < num; i++) {
+				var b = cap.GetCheck(i);
+				if(true) {
+					var file = cap.GetItemPath(i);
+					fileNames.push(file);
+				}
+			}
+		}
+		if (localParent.isReplace) {
+			uploadReplace();
+		} else {
+			uploadNew();
+		}
+		back();
+	},500);
+}
+//返回
+function back() {
+	unMask();
+	//closecamera();
+	window.close();
+}
+//替换文件
+function uploadReplace() {
+	var file = fileNames[fileNames.length - 1];
+	//"d:\\/1464872236390.jpg"
+	var fileInfo = filextApi.getFilename(file.replace("/", ""));
+
+	var config = localParent.replaceData;
+	var data = {
+		node : filextApi.getNodeX(config.node),
+		uuid : config.uuid,
+		method : 'putStorageContent',
+		local : "",
+		uuidExt : fileInfo[2]
+	};
+
+	if (filextApi.getWatermark() != null) {
+		data.watermark = filextApi.getWatermark();
+	}
+	
+	var path = filextApi.WEB_APP + '/filext-api?local=true&replace=true&watermark='
+			+ encodeURIComponent(data.watermark) + '&node=' + data.node
+			+ '&uuidExt=' + data.uuidExt + '&uuid=' + data.uuid
+			+ '&method=' + data.method + '&local=' + data.local;
+	var host = window.location.host;
+	var port = host.split(":")[1];
+	host = host.split(":")[0];
+	var url = "http://" +host+":"+port+path;
+	var res = CmCaptureOcx.UpdataFile(url, file, 0);
+	if(res == 1){
+       	var result = filextApi.commonCall({
+			data: {
+				method: 'updateStorageObject',
+				uuid: config.uuid,
+				uuidExt: fileInfo[2],
+				filename: fileInfo[0],
+				title: fileInfo[1],
+				filesize: file.filesize,
+				highshot : true
+			}
+		});
+       	localParent.updateAfterUpload(result.success);
+	}else{
+		alert('图片保存失败');
+	}
+}
+//上传新文件-批量
+function uploadNew() {
+	var res = 1;
+	for ( var i in fileNames) {
+		// uploadPhotoFile(fileNames[i], 8000);
+		res = uploadPhotoFile(fileNames[i], 8000);
+	}
+	if(res == 1){
+		localParent.updateAfterUpload(true);
+	}else{
+		localParent.updateAfterUpload(false);
+	}
+}
+//上传单个上传
+function uploadPhotoFile(photoName, filesize){
+	//传入的photoName是文件路径，以下方法可以截取文件名等信息
+	/* var file = photoName;
+	//"d:/xxx/1464872236390.jpg"
+	var fileInfo = filextApi.getFilename(file.replace("/", ""));
+	alert("photoName="+fileInfo[0]); */
+	
+	var config = {
+			uuid : localParent.currentId,
+			filename : photoName,
+			filesize : filesize
+		};
+		var res = filextApi.requestBeforeUpload(config);
+		if (filextApi.getWatermark() != null) {
+			res.watermark = filextApi.getWatermark();
+		}
+		var path = filextApi.WEB_APP + '/filext-api?local=true&watermark='
+				+ encodeURIComponent(res.watermark) + '&node=' + res.node
+				+ '&uuidExt=' + res.uuidExt + '&uuid=' + res.uuid + '&method='
+				+ res.method; 
+		var host = window.location.host;
+		var port = host.split(":")[1] || '80';
+		host = host.split(":")[0];
+		var url = "http://" +host+":"+port+path;
+		var ResultData = CmCaptureOcx.UpdataFile(url, photoName, 0);
+		return ResultData;	
+}
+
+function doMask(){
+	$("#highshoot").hide();
+//		$("#mask").show();
+    $("#mask").fadeTo(350,0.5);  
+	/* setTimeout(function() {
+		$("#mask").hide();
+		$("#highshoot").show();
+	},4000); */
+}
+
+function unMask(){
+	$("#highshoot").show();
+	$("#mask").hide();
+}
+//上移
+function moveup() {
+	var num = cap.GetListCount();
+	for (var i = 0; i < num; i++) {
+		var b = cap.GetCheck(i);
+		if (b == 1) {
+			cap.ImageRiseEx();
+		}
+	}
+}
+//下移
+function movedown() {
+	var num = cap.GetListCount();
+	for (var i = 0; i < num; i++) {
+		var b = cap.GetCheck(i);
+		if (b == 1) {
+			cap.ImageFallEx();
+		}
+	}
+}
+//左转
+function leftRotate() {
+	var num = cap.GetListCount();
+	var count = new Array();
+	;
+	for (var i = 0; i < num; i++) {
+		var b = cap.GetCheck(i);
+		if (b == 1) {
+			count.push(i);
+			//cap.ImageRotate(i, -90);
+		}
+	}
+	if (count.length == 0) {
+		alert("请选择左转的图像");
+	} else {
+		for ( var i in count) {
+			cap.ImageRotate(count[i], -90);
+			cap.SetCheck(count[i]);
+		}
+	}
+}
+//右转
+function rightRotate() {
+	var num = cap.GetListCount();
+	var count = new Array();
+	;
+	for (var i = 0; i < num; i++) {
+		var b = cap.GetCheck(i);
+		if (b == 1) {
+			count.push(i);
+			//cap.ImageRotate(i, 90);
+			//cap.SetCheck(i);
+		}
+	}
+	if (count.length == 0) {
+		alert("请选择右转的图像");
+	} else {
+		for ( var i in count) {
+			cap.ImageRotate(count[i], 90);
+			cap.SetCheck(count[i]);
+		}
+	}
+}
+
+//设置模式
+function setMode(el) {
+	var value = el.value;
+	if (value == 0) {//全屏模式
+			bCropArea = 0;
+			bAdjustMode = 0;
+	} else if (value == 1) {//手动剪裁
+		bCropArea = 1;
+		bAdjustMode = 0;
+	} else if (value == 2) {//自动剪裁
+		bCropArea = 0;
+		bAdjustMode = 1;
+	}
+	CmCaptureOcx.CusCrop(bCropArea);
+	CmCaptureOcx.AutoCrop(bAdjustMode);
+}
+
+//紫光相应function
+
+//添加驱动
+function AddDevice() {
+	var i = 0;
+	var total = CmCaptureOcx.GetDevCount();
+	for (i = 0; i < total; i++) {
+		var DevEle = CmCaptureOcx.GetDevFriendName(i);
+		Reso.DeviceName.options[i].text = DevEle;
+	}
+}
+
+//初始化启动高拍
+function StartVideo() {
+	//CmCaptureOcx.Initial();
+	CmCaptureOcx.StartRun(index);
+	AddResolution2Comb(Reso);
+	//获取cookie中的分辨率，并设置初始
+	var idx=getCookie("GPY_FBL");
+	if(!idx){
+		idx=7;//'1024*768'
+	}
+	SetResolution(idx);
+	SetFileType();
+}
+//设置分辨率
+function SetResolution(init) {
+	var obj = document.getElementById("Resolution");
+	var index = obj.selectedIndex;
+	if(init!=null){			
+		for (var i = 0; i < CmCaptureOcx.GetResolutionCount();i++ )
+		{
+			if(init==i){
+				break;
+			}
+		}
+		CmCaptureOcx.SetResolution(i);
+		obj.selectedIndex = i;			
+	}else {
+		CmCaptureOcx.SetResolution(index);
+		setCookie("GPY_FBL",index);	//保存分辨率至Cookie 
+	}
+}
+//文件类型
+function SetFileType() {
+	var index = imgeType.selectedIndex;
+	CmCaptureOcx.SetFileType(index);
+}
+
+function AddResolution2Comb(f) {
+	var i = 0;
+	var total = CmCaptureOcx.GetResolutionCount();
+	for (i = 0; i < total; i++) {
+		var resolution = CmCaptureOcx.GetResolution(i);
+		f.Resolution.options[i].text = resolution;
+	}
+}
+
+
+function getCookie(name){
+	var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+	if(arr=document.cookie.match(reg)){
+		return unescape(arr[2]);
+	}else
+		return null;
+}
+function setCookie(name,value){
+	var Days = 60;
+	var exp = new Date();
+	exp.setTime(exp.getTime() + Days*24*60*60*1000);
+	document.cookie = name + "="+ escape (value) + ";expires=" + exp.toGMTString();
+}
+//摄像头切换
+function ChangeDevice()
+{
+	var obj=document.getElementById("DeviceName") ;
+	index=obj.selectedIndex;
+	CmCaptureOcx.StartRun(index);
+	AddResolution2Comb(Reso);
+	SetResolution();
+}
+//拍照类型切换
+function SetImageColorMode()
+{
+	var obj=document.getElementById("ColorMode") ;
+	var index=obj.selectedIndex;
+	CmCaptureOcx.SetImageColorMode(index);
+}
+</script>
+</head>
+<body onload="initialize()">
+
+	<div id="globeDiv">
+		<div id="mask" class="mask"
+			style="text-align: center; padding: 15%; display: none">
+			<!-- 			<img alt="" src="style/images/timg.gif"> -->
+			<div
+				style="background-color: #C7EDCC; border: 5px solid black; width: 200px; height: 45px; line-height: 35px; text-align: center; margin: 0 auto;">
+				<span>请稍等...</span>
+			</div>
+		</div>
+		<div id="highshoot" style="position: absolute; width: 100%; top: 0px;">
+			<div class="shoot"
+				style="text-align: center; left: 0px; right: 200px">
+				<object id="CmCaptureOcx" width="90%" height="100%"
+					classid="clsid:3CA842C5-9B56-4329-A7CA-35CA77C7128D"></object>
+			</div>
+			<div id="imageDiv" class="shoot" style="width: 180px; right: 0px">
+				<!--[if gte IE 7]>     
+		        <object classid="clsid:8622e61a-22d1-4c10-9ecc-4dfc1f9a4f03" id="cap" width="100%" height="100%" ></object>
+				<![endif]-->
+				<!--[if !IE]> -->
+				<object type="application/x-itst-activex"
+					clsid="{8622e61a-22d1-4c10-9ecc-4dfc1f9a4f03}" id="cap"
+					width="100%" height="100%"></object>
+				<!-- <![endif]-->
+			</div>
+		</div>
+
+		<div id="operate" align="center"
+			style="position: absolute; width: 100%; height: 80px;">
+			<form method="POST" action="--WEBBOT-SELF--" id="form1"
+				class="form-inline clearfix" name="Reso">
+				<input type="hidden" id="viewImagePath" /> <input type="hidden"
+					id="rotationNum" /> <input type="hidden" id="isSelectAll" />
+				<div class="btn-toolbar">
+					<label> <input type="radio" id="docMode" value="0"
+						name="mode" onclick="setMode(this)">全屏幕
+					</label> <label> <input type="radio" id="handMode" value="1"
+						name="mode" onclick="setMode(this)">手动剪裁
+					</label> <label> <input type="radio" id="certMode" value="2"
+						name="mode" onclick="setMode(this)" checked="checked">自动剪裁
+					</label> <input class="btn btn-primary" type="button" value="拍照"
+						onclick="shot()"> <input class="btn btn-success"
+						type="button" value="保存" onClick="UpdataFile();" /> <input
+						class="btn btn-danger" type="button" value="删除"
+						onclick="deleteImage()" /> <input class="btn btn-primary"
+						type="button" value="前移" onclick="moveup()" /> <input
+						class="btn btn-danger" type="button" value="后移"
+						onclick="movedown()" /> <input class="btn btn-primary"
+						type="button" value="左转" onclick="leftRotate()" /> <input
+						class="btn btn-danger" type="button" value="右转"
+						onclick="rightRotate()" />
+					<!-- <input class="btn btn-info" type="button" value="返回" onClick="back();" /> -->
+				</div>
+				<div>
+					<div class="panel panel-default" style="margin-bottom: 0px">
+						<div class="panel-heading">
+							<h4 class="panel-title">
+								<a data-toggle="collapse" href="#setting">高级</a>
+							</h4>
+						</div>
+						<div id="setting" class="panel-collapse collapse">
+							<div class="panel-body">
+								<div class="form-group">
+									<label class="control-label">设 备 名 称: </label> <select
+										class="form-control" name="DeviceName" id="DeviceName"
+										onchange="ChangeDevice()">
+										<option value="0"></option>
+										<option value="1"></option>
+										<option value="2"></option>
+										<option value="3"></option>
+										<option value="4"></option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label class="control-label">分 辨 率: </label> <select
+										class="form-control" name="Resolution" id="Resolution"
+										onchange="SetResolution()">
+										<option value="0">开启视频后获取分辨率</option>
+										<option value="1"></option>
+										<option value="2"></option>
+										<option value="3"></option>
+										<option value="4"></option>
+										<option value="5"></option>
+										<option value="6"></option>
+										<option value="7"></option>
+										<option value="8"></option>
+										<option value="9"></option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label class="control-label">图 片 格 式: </label> <select
+										class="form-control" name="FileType" id="FileType"
+										onchange="SetFileType()">
+										<option value="0">bmp</option>
+										<option value="1" selected="selected">jpg</option>
+										<option value="2">tif</option>
+										<option value="3">png</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label class="control-label">颜 色 格 式: </label> <select
+										class="form-control" name="ColorMode" id="ColorMode"
+										onchange="SetImageColorMode()">
+										<option value="0">彩色</option>
+										<option value="1">灰度</option>
+										<option value="2">黑白</option>
+										<!-- <option value="3">印章</option>
+								<option value="4">签名</option> -->
+									</select>
+								</div>
+								<div style="clear: both;"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</body>
+</html>

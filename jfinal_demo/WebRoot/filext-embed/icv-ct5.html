@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>影像采集和查看器</title>
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"></link>
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap-icon.css"></link>
+<link rel="stylesheet" href="lib/jcrop/css/jquery.Jcrop.min.css"></link>
+<link rel="stylesheet" href="lib/jquery/jquery-slider.min.css"></link>
+<link rel="stylesheet"
+	href="lib/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css"></link>
+<link rel="stylesheet" href="style/style5.css"></link>
+<link href="lib/webuploader/webuploader.css" type="text/css" rel="stylesheet" />
+
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/jquery/jquery-migrate.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="lib/handlebars/handlebars-v2.0.0.js"></script>
+<script type="text/javascript"
+	src="lib/dragsort/jquery.dragsort-0.5.2.js"></script>
+<script type="text/javascript" src="lib/jcrop/js/jquery.Jcrop.min.js"></script>
+<script type="text/javascript" src="lib/jquery/jquery-slider.min.js"></script>
+<script type="text/javascript" src="lib/pdf/jquery.media.js"></script>
+<script type="text/javascript"
+	src="lib/bootstrap-datetimepicker/bootstrap-datetimepicker.js"></script>
+<script type="text/javascript"
+	src="lib/bootstrap-datetimepicker/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+<script type="text/javascript" src="lib/webuploader/webuploader.js"></script>
+
+<link rel="stylesheet" href="lib/gallery/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="lib/gallery/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="lib/gallery/dist/jquery.vm-carousel.css">
+<script src="lib/gallery/js/modernizr.js"></script>
+<script src="lib/gallery/dist/jquery.vm-carousel.js"></script>
+
+
+<script type="text/javascript" src="bin/CHighshoot.js?v1.0"></script>
+<script type="text/javascript" src="bin/icv-sdk.js?v1.2"></script>
+<script type="text/javascript" src="bin/icv-impl.js?v1.2"></script>
+<script type="text/javascript" src="bin/script5.js"></script>
+<script type="text/javascript" src="bin/CHighshoot.js?v1.0"></script>
+<style>
+body {
+	font-size: 12px !important;
+}
+</style>
+
+<div class="container-fluid" onload="fun()">
+
+<div class='vmc-container'><div class='vmc-viewport'> +
+				<ul class='vmcarousel-normal vmcarousel' style='width: 1368px; transition: transform 0.5s; transform: translate3d(-228px, 0px, 0px);'>	  
+				<li data-slide='0' class='' style='width: 228px;'><img src='images/1.jpg' alt='' width='200'></li>	
+				</ul></div><a href='' class='vmc-arrow-left'></a><a href='' class='vmc-arrow-right'></a></div>
+				
+	<div class="clearfix" id="view">
+		<div class="content-wrap">
+			<!-- 列表视图 -->
+			<div id="listView">
+				<div class="guide">
+
+					<div class="thumb">
+						<div class="materialList">
+							<table class="thumbTable">
+								
+							</table>
+						</div>
+						<hr class='division'>
+						<div class='picList'>
+							<p class="text-danger">身份证正反面</p>
+							<div class="btngroup">
+							</div>
+							<div style="padding-top: 10px">
+								
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+
+				<div id="icvRight">
+					<div>
+						<ul class="nav nav-tabs" id="myTabs" style="padding-left: 10px">
+							<li role="presentation" class="active"><a href="#"
+								data-data='1'>高拍采集</a></li>
+							<li role="presentation"><a href="#">本地上传</a></li>
+						</ul>
+					</div>
+					<div id="pic-shot">
+						<form>
+							<fieldset>
+								<legend align="center" id="highshootPhotoW" >
+                                                                身份证正反面
+                                                                </legend>
+								<div style="padding-left: 10px">
+									<p>
+									<iframe src="client.html" id="highshootPhoto"></iframe>
+									</p>
+									<input type="button" class="btn btn-primary" value="启动主"
+										name="StartBtn" onClick="start('bStartPlay')"> <input
+										type="button" class="btn btn-primary" value="启动副"
+										name="StopBtn" onClick="start('bStartPlay2')"> <input
+										type="button" class="btn btn-primary" value="停止"
+										name="StopBtn" onClick="start('bStopPlay')"> <input
+										type="button" class="btn btn-primary" value="上传"
+										name="bUpLoadImage"
+										onClick="start('bUpLoadImage(D:\\1.JPG|D:\\2.JPG|D:\\3.JPG,192.168.3.118,8080,/shop/servlet/uploadServlet)')">
+								</div>
+
+							</fieldset>
+						</form>
+					</div>
+					<div id="dragWrap" class="content clearfix">
+						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="modal fade" id="modal-upload">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-body">
+				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+				<!-- 默认上传界面 -->
+				<div id="upload-default">
+					<ul class="clearfix">
+						<li class="highShoot"><img src='style/images/gaopaiyi.jpg' /><span>捷宇-高拍</span></li>
+						<li class="highShootDyp"><img src='style/images/gaopaiyi-dyp.jpg' /><span>德意拍-高拍</span></li>
+						<li class="highShootLt"><img src='style/images/gaopaiyi-dyp.jpg' /><span>良田-高拍</span></li>
+						<li class="highShootXinhan"><img src='style/images/gaopaiyi-dyp.jpg' /><span>多易拍-高拍</span></li>
+						<li class="highShootFangzheng"><img src='style/images/gaopaiyi-dyp.jpg' /><span>方正-高拍</span></li>
+						<li class="highShootGuoguang"><img src='style/images/gaopaiyi-dyp.jpg' /><span>国光-高拍</span></li>
+						<li class="highShootJP"><img src='style/images/gaopaiyi-dyp.jpg' /><span>九派-高拍</span></li>
+						<li class="nativeUpload"><img src='style/images/computer.jpg' /><span>本地上传</span></li>
+						<li class="basefile"><img src='style/images/usefile.jpg' /><span>浏览基础资料</span></li>
+					 	<li class="finance"><img src='style/images/usefile.jpg' /><span>浏览</span></li>
+						<li class="scanning"><img src='style/images/saomiaoyi.jpg' /><span>扫描</span></li> 
+					</ul>
+				</div>
+				<!-- 高拍界面 -->
+				<iframe id="high-shoot_f" class="upload-view" src="" width="100%" height="98%" frameborder="0"></iframe>
+				<!-- 浏览界面 -->
+				<div id="finance" class="upload-view">
+					<div class="form-inline">
+						<div class="form-group">
+							<label>关键字:</label>
+							<input class='form-control' type="text" name="finance" /> 
+						</div>
+						<button class="btn btn-primary finance-search" type="button">查询</button>
+					</div>
+					<ul class="clearfix"></ul>
+					<div class="upload-footer">
+						<button class="btn btn-primary finance-upload" type="button">引用</button>
+						<button class="btn btn-info back-to-default" type="button">返回</button>
+					</div>
+				</div>
+				<!-- 本地上传界面 -->
+				<div id="native-upload" class="upload-view">
+					<div id="native-file">本地上传</div>
+					<!-- <div class="progress" style="width:20%;margin-left:2%;display:none">
+                        <span class="text">0%</span>
+                        <span class="percentage"></span>
+                    </div> -->
+                    <div class="upload-footer">
+						<!-- <button class="btn btn-primary fileinput-upload" type="button">上传</button> -->
+						<button class="btn btn-info back-to-default" type="button">返回</button>
+					</div>
+				</div>
+				<!-- 扫描界面 -->
+				<iframe id="scanning_f" class="upload-view" src="" width="100%" height="100%" frameborder="0"></iframe>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+$(function(){
+	$('.progress').hide();
+	var icv = parent.icv == null ? parent._icv : parent.icv; 
+	if (icv) icv.ctloaded.call(icv, window);
+	init(parent.icv.getIcvConfig());
+	if (icv.complete && typeof(icv.complete)=='function') {
+		icv.complete();
+	}
+	$('.v1-datetime').datetimepicker({
+		language : 'zh-CN',
+		weekStart : 1,
+		todayBtn : 1,
+		autoclose : 1,
+		todayHighlight : 1,
+		startView : 2,
+		minView : 2,
+		forceParse : 0
+	});
+	/*收缩展开边栏*/
+	var velocity=1000;
+	$('.side-btn').toggle(function(){
+		$(this).children('i').removeClass('glyphicon-chevron-left').addClass('glyphicon-chevron-right');
+		$(this).parent('.guide').animate({'left':'-40%'},velocity,function(){
+			$(this).css("width","0px");
+			$(this).css("left","0px");
+		});
+	},function(){
+		$(this).children('i').removeClass('glyphicon-chevron-right').addClass('glyphicon-chevron-left');
+		$(this).parent('.guide').css("width","43%");
+		$(this).parent('.guide').css("left","-43%");
+		$(this).parent('.guide').animate({'left':'0px'},velocity);
+	});
+	$('.side-btn').children('i').addClass('glyphicon-chevron-left');
+	
+	var highshootPhotoW =$('#highshootPhotoW').width();
+	var highshootPhotoH =$('#pic-shot').height();
+	$('#highshootPhoto').width( highshootPhotoW*0.99 );
+	$('#highshootPhoto').height(highshootPhotoH*0.75) ;
+
+	$('#myTabs a').click(function (e) {
+	  e.preventDefault()
+	  $(this).tab('show');
+	  if(e.toElement.innerText == "本地上传"){
+	        $('#pic-shot').hide();
+	        $('#dragWrap').show();
+	  }else{
+	        $('#pic-shot').show();
+	        $('#dragWrap').hide();    
+	  }
+	})
+	$('#pic-shot').show();
+    $('#dragWrap').hide(); 
+    
+});
+
+jQuery(function($){
+	  $('.vmcarousel-centered').vmcarousel({
+		 centered: true,
+		 start_item: 2,
+		 autoplay: false,
+		 infinite: false
+	  });
+
+	  $('.vmcarousel-centered-infitine').vmcarousel({
+		 centered: true,
+		 start_item: 1,
+		 autoplay: false,
+		 infinite: true
+	  });
+
+	  $('.vmcarousel-normal').vmcarousel({
+		 centered: false,
+		 start_item: 0,
+		 autoplay: false,
+		 infinite: false
+	  });
+ });
+ 
+ $('.vmc-arrow-left').click(function(){
+	 alert(0);
+ });
+ 
+$('.btn-printBar').click(function(){
+	var fuid = filextApi.uuid;
+	var title = encodeURIComponent(filextApi.config.bizTitle);
+	//$('#printframe').attr('src','donePrintDABQ.jsp?title='+title+'&code='+fuid);
+	
+	var tempForm = document.createElement("form"); 
+	tempForm.id="tempForm1"; 
+	tempForm.method="post"; 
+	tempForm.action="donePrintDABQ.jsp"; 
+	tempForm.target="printframe";
+	var hideInput = document.createElement("input"); 
+	var hideInput1 = document.createElement("input"); 
+	hideInput.type="hidden";
+	hideInput.name="fuid";
+	hideInput.value= fuid; 
+	hideInput1.type="hidden";
+	hideInput1.name="title";
+	hideInput1.value= title;
+	tempForm.appendChild(hideInput1);
+	tempForm.appendChild(hideInput); 
+	document.body.appendChild(tempForm); 
+	tempForm.submit(); 
+	document.body.removeChild(tempForm);
+	
+	//window.open('donePrintDABQ.jsp?code='+fuid,'printframe');
+});
+
+function getBizTitle() {
+	return $('.thumbTable tr.thumbItem.active').data('title');
+}
+
+function fun(){
+	console.log(0);
+}
+</script>

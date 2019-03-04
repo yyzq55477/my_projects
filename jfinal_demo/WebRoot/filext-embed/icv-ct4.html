@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>影像采集和查看器</title>
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"></link>
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap-icon.css"></link>
+<link rel="stylesheet" href="lib/jcrop/css/jquery.Jcrop.min.css"></link>
+<link rel="stylesheet" href="lib/jquery/jquery-slider.min.css"></link>
+<link rel="stylesheet" href="lib/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css"></link>
+<link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css"></link>
+<link rel="stylesheet" href="lib/picasa/style/style.css"></link>
+<link rel="stylesheet" href="style/style4-2.css"></link>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/jquery/jquery-migrate.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="lib/handlebars/handlebars-v2.0.0.js"></script>
+<script type="text/javascript" src="lib/dragsort/jquery.dragsort-0.5.2.js"></script>
+<script type="text/javascript" src="lib/jcrop/js/jquery.Jcrop.min.js"></script>
+<script type="text/javascript" src="lib/jquery/jquery-slider.min.js"></script>
+<script type="text/javascript" src="lib/pdf/jquery.media.js"></script>
+<script type="text/javascript" src="lib/uploadify/jquery.uploadify.min2.js"></script>
+<script type="text/javascript" src="lib/webuploader/webuploader.min.js"></script>
+<script type="text/javascript" src="bin/icv-sdk.js?v1.2"></script>
+<script type="text/javascript" src="bin/icv-impl.js?v1.2"></script>
+<script type="text/javascript" src="bin/script4.js?v1.3"></script>
+<link href="lib/webuploader/webuploader.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="bin/CHighshoot.js?v1.0"></script>
+
+</head>
+
+
+<body onbeforeunload="unloadHandler();" >
+    <div id="refreshing" style="display:none">loading......</div>
+    <div id="showtip"></div>
+    <div id="loading" style="display:none"><img src="style/images/loading.gif" /></div>
+
+
+    <div id="listView">
+        <div class="guide">
+            
+             <div class='evi-menu' id='tabs'>
+                    <h2>分类 
+                    <img class="category-add" alt="添加" src="images/add-icon.png"></h2> 
+                    <div class="thumb">
+                    </div>
+            </div>
+            <!-- <ul class="operate">
+                <button class="btn btn-info btn-pic-remove" type="button">
+                    <i class="icon-white icon-remove"></i>删除
+                </button>
+                <button class="btn btn-info btn-pic-viewall" type="button">
+                    <i class="icon-white icon-search"></i><span>查看全部</span>
+                </button>
+            </ul> -->
+            <div class = "evi-cont" id="evi-cont">
+                <div class="tab-cont" id="tab">
+                    <div class="operate clear">
+                        <ul class="fl">
+                            <li ><div id="native-file"><span style="margin-left:30px">本地上传</span></div></li>
+                        	<li  class="scanning bgCorlor scan">扫描仪</li>
+                        </ul>
+                        <div class="fl fh" style="position: relative;">
+                        	<!-- <div class="operate clear">
+								<ul class="fl">
+									<li class="highShot more-oper">高拍仪</li>
+								</ul>
+                        	</div> -->
+                            <a class="highshoot">高拍仪</a>
+                            <ul class="more-list more-list-fh">
+                               	<li class="highShoot"><span>捷宇-高拍</span></li>
+								<li class="highShootDyp"><span>德意拍-高拍</span></li>
+								<li class="highShootLt"><span>良田-高拍</span></li>
+								<li class="highShootXinhan"><span>多易拍-高拍</span></li>
+								<li class="highShootFangzheng"><span>方正-高拍</span></li>
+								<li class="highShootGuoguang"><span>国光-高拍</span></li>
+                            </ul>
+                        </div>
+                       
+                        <div class="fl fm" style="position: relative;">
+                            <a class="more-oper">更多操作</a>
+                            <ul class="more-list more-operate">
+                                <li class="btn-pic-remove">删除</li>
+                                <!-- <li>查看全部</li> -->
+                            </ul>
+                        </div>
+                        <div class="fr searchpic-box clear">
+                            <input id="search-input" type="text" placeholder="请输入图片名称进行搜索"/>
+                            <input type="button" value="" class="search-pic"/>
+                        </div>
+                    </div>
+                    <div class="progress" style="width:20%;margin-left:2%">
+                        <span class="text">0%</span>
+                        <span class="percentage"></span>
+                    </div>
+                    <div class="cont-box">
+                    </div>
+                </div>
+            </div>
+             <div class="side-btn"><i class="glyphicon pull-right"></i></div>
+        </div>
+        <div class="modal prompt-modal" id="modal-group">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+				<h4 class="modal-title" id="groupTitle">New message</h4>
+			</div>
+			<div class="modal-body clearfix" style="text-align: center;">
+				<form name="groupForm" class="form-inline">
+					<div class='input-wrap' style="position: relative;padding-left: 60px;margin-bottom: 10px;">
+						<div style="position:absolute;top:0;left:0;">材料名称:</div>
+						<textarea id='categoryName' class='form-control prompt-input' style="width:100%"></textarea>
+					</div>
+					 
+					<!-- <div class="form-group date-group" id="materialTimeD">
+						<label class="control-label">材料制成时间:</label>
+						<div class="input-group date v1-datetime" data-date-format="yyyy-mm-dd">
+							<input class="form-control" style="width:260px" type="datetime" name="materialTime" id="materialTime" readonly="true" />
+							<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+						</div>
+					</div> -->
+					<!-- <div class='form-group'>
+						<label>备&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注:</label>
+						<input id='categoryName5' class='form-control prompt-input' type='text' />
+					</div> -->
+				</form>
+				<div class='btn-group'>
+					<button class='btn btn-primary category-save-edit'>保存</button>
+					<button class='btn btn-default' data-dismiss="modal">取消</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 分类名称修改 -->
+<div class="modal prompt-modal" id="modal-category">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+				<h4 class="modal-title">修改名称</h4>
+			</div>
+			<div class="modal-body clearfix">
+				<div class='input-wrap'><input class='form-control prompt-input' type='text' /></div>
+				<div class='btn-group'>
+					<button class='btn btn-primary category-edit-save'>保存</button>
+					<button class='btn btn-default' data-dismiss="modal">取消</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+       <!--  <div id="dragWrap" class="content"></div> -->
+       <!--  <div id="fileInfo"></div> -->
+    <!-- </div> -->
+  </body>
+<script type="text/javascript">
+$(function(){
+	$('.progress').hide();
+    var icv = parent.icv == null ? parent._icv : parent.icv;
+    if (icv) icv.ctloaded.call(icv, window);
+    init(parent.icv.getIcvConfig());
+    if (icv.complete && typeof(icv.complete)=='function') {
+        icv.complete();
+    }
+    var width;
+    var bodyWid;
+    width = $('#evi-cont').width();
+	bodyWid = document.body.offsetWidth;
+	$(this).children('i').removeClass('glyphicon-chevron-left').addClass('glyphicon-chevron-right');
+	$('.evi-menu').css('width','0');
+	$('.evi-menu').css('left','0');
+	$('.side-btn').css('left','0');
+	$('.evi-cont').css('width',bodyWid);
+	$('.evi-cont').css('left',5);
+	$('.tab-cont').css('width','100%');
+	if(icv.flag == 1){
+		showLeftMenu();
+	}else{
+		closeLeftMenu();
+	}
+    /*收缩展开边栏*/
+	var velocity=1000;
+    function closeLeftMenu(){
+    	width = $('#evi-cont').width();
+		bodyWid = document.body.offsetWidth;
+		$(this).children('i').removeClass('glyphicon-chevron-left').addClass('glyphicon-chevron-right');
+		$('.evi-menu').css('width','0');
+		$('.evi-menu').css('left','0');
+		$('.side-btn').css('left','0');
+		$('.evi-cont').css('width',bodyWid);
+		$('.evi-cont').css('left',5);
+		$('.tab-cont').css('width','100%');
+    }
+    
+    function showLeftMenu(){
+    	$(this).children('i').removeClass('glyphicon-chevron-right').addClass('glyphicon-chevron-left');
+		$('.evi-menu').css('width','230');
+		$('.evi-menu').css('left','5');
+		$('.side-btn').css('left',230);
+		$('.evi-cont').css('width',width);
+		$('.evi-cont').css('left',190);
+		$('.tab-cont').css('width','94%');
+    }
+	$('.side-btn').children('i').addClass('glyphicon-chevron-left');
+});
+
+function unloadHandler() {
+    // 取消窗口关闭时的监听事件
+    document.getElementsByTagName("BODY")[0].onbeforeunload = null;
+    var el = document.getElementById("high-shoot_f");
+    var e2 = document.getElementById("scanning_f");
+    if (el) {
+    $('#high-shoot_f').attr('src','about:blank');
+            el.contentWindow.document.write('');
+          // el.contentWindow.document.clear();
+           var p = el.parentNode;
+            p.removeChild(el);
+            p.appendChild(el);
+    }
+    if (e2) {
+    $('#scanning_f').attr('src','about:blank');
+        e2.contentWindow.document.write('');
+       //e2.contentWindow.document.clear();
+        var p = e2.parentNode;
+        p.removeChild(e2);
+        p.appendChild(e2);
+    }
+    return true;
+}
+</script>
+
+</html>

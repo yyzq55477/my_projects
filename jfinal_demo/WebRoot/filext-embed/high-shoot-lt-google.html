@@ -1,0 +1,470 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"></link>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="bin/icv-sdk.js?v1.1"></script>
+<script type="text/javascript" src="bin/qwebchannel.js?v1.1"></script>
+<meta http-equiv="Cache-Control" content="no-store" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>天正影像系统</title>
+<style type="text/css">
+html, body {
+	width: 100%;
+	height: 100%;
+}
+
+#globeDiv {
+	width: 100%;
+	height: 100%;
+	min-height: 200px;
+	box-sizing: border-box;
+}
+
+.shoot {
+	position: absolute;
+	top: 0px;
+	height: 100%;
+	border: 1px solid #ccc;
+	margin: 5px
+}
+
+.imageDiv1 {
+	position: relative;
+	width: 120px;
+	height: 90px;
+	text-align: center;
+	margin: 2px;
+	cursor: pointer;
+}
+
+.btn {
+	margin: 5px;
+}
+
+.btn-toolbar, .form-inline {
+	margin-left: 15px;
+	margin-right: 15px;
+}
+
+.form-inline .form-group {
+	float: left;
+	width: 45%;
+	height: 30px;
+	margin-bottom: 20px;
+}
+
+.form-inline .control-label {
+	display: block;
+	width: 36%;
+	height: 30px;
+	line-height: 30px;
+	text-align: right;
+	float: left;
+}
+
+.form-inline .form-control {
+	display: block;
+	width: 200px;
+	margin-left: 10px;
+	float: left;
+}
+
+.btn-toolbar {
+	text-align: left;
+}
+
+.mask {
+	position: absolute;
+	top: 0px;
+	filter: alpha(opacity = 60);
+	background-color: #000000;
+	z-index: 1002;
+	left: 0px;
+	opacity: 0.5;
+	-moz-opacity: 0.5;
+	width: 100%;
+	height: 100%;
+}
+</style>
+<script type="text/javascript">
+
+
+//BEGIN SETUP
+var photographData = "";
+var baseUrl;
+var socket;
+var isNeedUpdate = false;
+
+function disconnect()
+{
+	dialog.get_actionType("closeSignal");
+	socket.close();
+	socket = null;
+}
+
+function connect()
+{
+	//socket.close();
+	//socket = null;
+	var ip = document.getElementById("serverIP").value;
+	baseUrl = "ws://" + ip + ":12345";
+	var re=/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;//正则表达式     
+	if(re.test(ip))     
+	{     
+		if( RegExp.$1<256 && RegExp.$2<256 && RegExp.$3<256 && RegExp.$4<256)
+		{
+			//alert("IP有效" + baseUrl);
+			openSocket();					
+		} 					
+	} 
+	else{
+		alert("请输入有效的IP地址" + baseUrl);
+	}						
+}
+function openSocket() {				
+	socket = new WebSocket(baseUrl);
+    socket.onclose = function()
+    {
+        console.error("web channel closed");
+    };
+    socket.onerror = function(error)
+    {
+        console.error("web channel error: " + error);
+    };
+	socket.onopen = function()
+    {
+        new QWebChannel(socket, function(channel) {
+            //获取c++注册对象
+            window.dialog = channel.objects.dialog;
+			
+			//网页关闭函数
+			window.onunload = function() {
+				dialog.get_actionType("closeSignal");
+			}
+			//断开按钮点击
+			/* document.getElementById("btnDisConnect").onclick = function() {
+				window.dialog = channel.objects.dialog;		
+				dialog.get_actionType("closeSignal");
+				var img = document.getElementById('big');				
+				img.src = "";
+				socket.close();
+				socket = null;	
+			}; */
+			
+			//分辨率列表点击
+			document.getElementById("resolutionList").onchange = function() {
+				var select = document.getElementById("resolutionList");
+				dialog.devChanged(select.value);
+			};
+			
+			//拍照按钮点击
+			document.getElementById("shot").onclick = function() {
+				var url = UpdataFile();
+				dialog.set_configValue('set_httpUrl:' + url);
+				dialog.photoBtnClicked("single");
+				dialog.get_actionType("savePhoto");
+				isNeedUpdate = true;
+			};
+			
+			//纠偏裁边
+			document.getElementById("setdeskew").onclick = function() {
+				dialog.get_actionType("setdeskew");
+			};
+			
+			//接收设备名(在设备列表中添加或删除item)
+			dialog.send_devName.connect(function(message) {							
+				/* //判断是否存在，否 加入，是 删除
+				if(message.indexOf('delete') >= 0)
+				{
+					var msg = message.substr(6);
+					var select = document.getElementById("devList");
+					select.remove(msg);															
+				} else{
+					var select = document.getElementById("devList");
+					//副头放在列表末
+					if(message.indexOf("USB") >= 0)
+					{
+						select.add(new Option(message));									
+					} else{
+						select.add(new Option(message), 0);
+						select.selectedIndex=0;
+					}
+				} */
+            });
+									
+			//接收设备分辨率，若为空，则清空现有列表
+			dialog.send_resolutionList.connect(function(message) {
+				if(message)
+				{
+					var select = document.getElementById("resolutionList");
+						select.add(new Option(message));
+				} else{
+					var select = document.getElementById("resolutionList");
+					select.options.length = 0;
+				}
+				dialog.devChanged('1280 * 1024');
+            });
+			
+			//接收设备出图模式，若为空，则清空现有列表
+			dialog.send_modelList.connect(function(message) {
+				/* if(message)
+				{
+					var select = document.getElementById("subtypeList");
+					if(message.indexOf("MJPG") >= 0)//默认mjpg
+					{
+						select.add(new Option(message),0);
+						select.selectedIndex=0;
+					} else{
+						select.add(new Option(message));
+					}
+				} else{
+					var select = document.getElementById("subtypeList");
+					select.options.length = 0;
+				} */
+            });
+			//服务器返回消息
+            dialog.sendPrintInfo.connect(function(message) {
+				if (isNeedUpdate&&message.indexOf('photoName:')) {
+					localParent.updateAfterUpload(true);
+					back();
+				}
+            });
+			//接收图片流用来展示，多个，较小的base64
+			dialog.send_imgData2.connect(function(message) {
+				changeImgdata(message);	
+            });
+			//接收图片流用来展示，单个，较大的base64
+			dialog.send_imaData3.connect(function(message) {
+				photographData = message;						
+            });
+			//网页加载完成信号
+			dialog.html_loaded("one");
+			dialog.devChanged('S920A3');
+			dialog.get_actionType("openVideo");
+			dialog.set_configValue('set_autoUpload:true');
+        });
+    }
+}
+
+//根据文本换图片
+function changeImgdata(message)
+{
+	var element = document.getElementById('big');
+	element.src = "data:image/jpg;base64," + message;;
+}
+
+//网页初始化函数
+window.onload = function() {
+	baseUrl = "ws://127.0.0.1:12345";			  
+	openSocket();              
+}
+//END SETUP
+
+
+	var	strFile;
+	var d = new Date();
+	
+	$(function() {
+		var width = $(document).width();
+		var height = $(document).height();
+		var offset = notIE ? ($(localParent).height()-$("#operate").height()-170) : height-$("#operate").height();
+		$("#highshoot").height(offset-10);
+		$("#operate").css("top", offset + "px");
+		$("#docMode").attr("checked", true);
+	});
+	
+	window.onbeforeunload = function() {
+		closecamera();
+	}
+
+</script>
+</head>
+<body>
+
+	<div id="globeDiv">
+		<div id="mask" class="mask"
+			style="text-align: center; padding: 15%; display: none">
+			<div
+				style="background-color: #C7EDCC; border: 5px solid black; width: 200px; height: 45px; line-height: 35px; text-align: center; margin: 0 auto;">
+				<span>请稍等...</span>
+			</div>
+		</div>
+		<div id="highshoot" style="position: absolute; width: 100%; top: 0px;height:600px">
+			<div class="shoot"
+				style="text-align: center; left: 0px; right: 200px">
+				<img id="big" width="100%" height="100%" /></img>
+			</div>
+		</div>
+
+		<div id="operate" align="center"
+			style="position: absolute; width: 100%; height: 80px;">
+			<form method="POST" action="--WEBBOT-SELF--" name="form1" id="form1"
+				class="form-inline clearfix" name="Reso">
+				<input type="hidden" id="viewImagePath" /> <input type="hidden"
+					id="rotationNum" /> <input type="hidden" id="isSelectAll" />
+				<div class="btn-toolbar">
+					<label><input id="setdeskew"
+						type="checkbox" value="">自动裁边</label>
+					<input id="shot" class="btn btn-primary" type="button" value="拍照"
+						onclick="shot()"> 
+						<input id="btnDisConnect" type="hidden"></input>
+				</div>
+				<div>
+					<div class="panel panel-default" style="margin-bottom: 0px">
+						<div class="panel-heading">
+							<h4 class="panel-title">
+								<a data-toggle="collapse" href="#setting">高级</a>
+							</h4>
+						</div>
+						<div id="setting" class="panel-collapse collapse">
+							<div class="panel-body">
+								<div class="form-group">
+									<label class="control-label">分辨率: </label> <select id="resolutionList"
+										class="form-control" style="width: 130px" id="exposure"
+										onchange="SetResolution(this)">
+									</select>
+								</div>
+								<div style="clear: both;"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+	var notIE = typeof (dialogArguments) == 'undefined';
+	var localParent = window.opener;
+	var filextApi = localParent.filextApi;
+	var fileNames = new Array();
+	//关闭高拍设备
+	function closecamera() {
+		document.getElementById("btnDisConnect").click();
+	}
+
+	//打开高拍设备
+	function StartVideo() {
+		
+	}
+	
+	//设置分辨率
+	function SetResolution(e) {
+		
+	}
+	
+	function setPicName()
+	{
+		var date=new Date();
+		var yy=date.getFullYear().toString();
+		var mm=(date.getMonth()+1).toString();
+		var dd=date.getDate().toString();
+		var hh=date.getHours().toString();
+		var nn=date.getMinutes().toString();
+		var ss=date.getSeconds().toString();
+		var mi=date.getMilliseconds().toString();
+		var picName=yy+mm+dd+hh+nn+ss+mi + ".jpg";
+		return picName;
+	}
+
+	function UpdataFile() {
+		doMask();
+		if (localParent.isReplace) {
+			var url = uploadReplace();
+			return url;
+		} else {
+			var url = uploadNew();
+			return url;
+		}
+	}
+	
+	function uploadReplace() {
+		var config = localParent.replaceData;
+		var data = {
+			node : filextApi.getNodeX(config.node),
+			uuid : config.uuid,
+			method : 'putStorageContent',
+			local : "",
+			uuidExt : 'jpg'
+		};
+
+		if (filextApi.getWatermark() != null) {
+			data.watermark = filextApi.getWatermark();
+		}
+
+		var path = filextApi.WEB_APP + '/filext-api?local=true&replace=true&watermark='
+				+ encodeURIComponent(data.watermark) + '&node=' + data.node
+				+ '&uuidExt=' + data.uuidExt + '&uuid=' + data.uuid
+				+ '&method=' + data.method + '&local=' + data.local;
+		var host = window.location.host;
+		var port = host.split(":")[1];
+		host = host.split(":")[0];
+		var url = "http://" +"192.3.3.214"+":"+port+path;
+		return url;
+	}
+	function uploadNew() {
+		var res = 1;
+		 var url = uploadPhotoFile(setPicName(), 8000);
+		 return url;
+		/* if (res == 1) {
+			localParent.updateAfterUpload(true);
+		} else {
+			localParent.updateAfterUpload(false);
+		} */
+	}
+	
+	function uploadPhotoFile(photoName, filesize) {
+		var config = {
+			uuid : localParent.currentId,
+			filename : photoName,
+			filesize : filesize
+		};
+		var res = filextApi.requestBeforeUpload(config);
+		if (filextApi.getWatermark() != null) {
+			res.watermark = filextApi.getWatermark();
+		}
+		var path = filextApi.WEB_APP + '/filext-api?local=true&watermark='
+				+ encodeURIComponent(res.watermark) + '&node=' + res.node
+				+ '&uuidExt=' + res.uuidExt + '&uuid=' + res.uuid + '&method='
+				+ res.method;
+		var host = window.location.host;
+		var port = host.split(":")[1] || '80';
+		host = host.split(":")[0];
+		var url = "http://" +host+":"+port+path;
+		return url;
+	}
+	
+	function back() {
+		unMask();
+		closecamera();
+		window.close();
+	}
+	
+	//设置模式
+	function setMode(el) {
+		var value = el.value;
+		if (value == 1) {//文档读取类型
+			CaptureOcx.SetRotateCrop(false);
+		} else if (value == 2) {//自动寻边
+			CaptureOcx.SetRotateCrop(true);
+		} else if (value == 3) {//人像，副摄像头
+			CaptureOcx.ToggleCamera(1); 	
+		}
+	}
+	
+	
+	function doMask(){
+		$("#highshoot").hide();
+        $("#mask").fadeTo(350,0.5);  
+
+	}
+	
+	function unMask(){
+		$("#highshoot").show();
+		$("#mask").hide();
+	}
+</script>

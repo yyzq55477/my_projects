@@ -1,0 +1,96 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>控件测试页面</title>
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"></link>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="scan.js"></script>
+<script type="text/javascript">
+function destory_activex(){  
+	    var active_object_id='scaner1'; //activex的控件id  
+	    var activex_obj=document.getElementById(active_object_id);  
+	    var parent_element=activex_obj.parentElement; //找到控件的父元素  
+	      
+	     //删除activex父元素的所有子元素   
+	     while (parent_element.children.length>0){  
+	        parent_element.removeChild(parent_element.children[0]);  
+	     }  
+	       
+}  
+</script>
+<style type="text/css">
+.btn-toolbar, .form-inline {
+	margin: 15px 0;
+}
+
+.form-inline .form-group {
+	float: left;
+	width: 330px;
+	height: 30px;
+	margin-bottom: 20px;
+}
+
+.form-inline .control-label {
+	display: block;
+	width: 100px;
+	height: 30px;
+	line-height: 30px;
+	text-align: right;
+	float: left;
+}
+
+.form-inline .form-control {
+	display: block;
+	width: 200px;
+	margin-left: 10px;
+	float: left;
+}
+
+.btn-toolbar {
+	text-align: center;
+}
+</style>
+</head>
+<body  onunload="destory_activex()">
+	<form class="form-inline clearfix" action="/upload" method="post"
+		id="form1" name="Reso" target="_blank">
+		<div class="btn-toolbar">
+			<input class="btn btn-primary" type="button"  id="btnScan" value="扫描"/> 
+			<input class="btn btn-success" type="button" id="btnUpload1"  value="保存"/>
+			<input class="btn btn-success" type="button" id="btnUpload2"  value="保存所有为pdf" style="display:none;"/>
+			<input class="btn btn-info" type="button" value="返回" onClick="parent.backToDefault();" />
+		</div>
+		<object classid="clsid:15D142CD-E529-4B01-9D62-22C9A6C00E9B"
+			id="scaner1" width="100%" height="600"
+			codebase="cabs/ScanOnWeb.cab#version=1,0,0,10">
+			<param name="licenseMode" value="3">
+   			<param name="key1" value="jINjZjnej/w1HBkEMQz6/9rF0V5txSSk6ub737BZOTv/UbKIbtESR6QdqJRYcZTbttfuE5XbL0hCyZOwrciuYuUFaQ98YHeX9rqUvj1m0Haovgl+ujWr2HbzY2u4K0rcSwJCB0JtAssSFG65e/X8pjoa/NItAS6zQjwbmX9+UqvAT8YKPUmHpILRlRu8dxexkNc3xJ19bOyF/VbQ">
+  			<param name="key2" value="q/jwsY7oPqhwEdftN5/hUlchY1gsz8OhmBps3ytzugfOBBTP6PY5VbE7W/Uwa3pM6V2EjIEjR1JM6p9heunPxvpN/vzN4EmbRXfUbcAx/ieGoFp3YavBpivHIjWIauS0EtXrF4euPmJuRUDwm5S8l9r/wX8jU2fvhdv9rcx+ExUacHN8FzpYb8HYuIWpmTleTDRYMoM1qfCS6Z4UX17MO2cogY1et4uaoFpCWW/Kkz1n5tzUqmg2/rI09TxZ1Bx0KZ+i+pqFE8X1qGE6cFhbjpqMZqrIMK8PEi4e4ho7sc2AMfj9TlSuuo8fslekb3en/x/yRB7CjkO7MERl9lip1MpGStN9LY8hTk/ULI8lL6/6xb9yu+2zBYOcaDn+vVk5gfWQbc1magSX0+XPj+QYpP35ICx5mbhMqsv/SjYstYq5FDYkeUd4Tk7Z5MrN/7eiyBkpUMITN3nT17GHERvP9hyOaUA3lNLGnRUovVB/ozYDJFRHTw1Z29GqyBLJPjanESekRg7R8By/7SOs3FZ018ABW0oCDdLy3gkLonom3N4B3wsledicwtf7uwf5txzINNREcPctCR74fBYr00wigi9DTkA04jDUZuV7bV9w0OWoEoMQJfNXypm4wnjnrQkuQ9Z5ceQkcIMohwjTSnyWhs6Yze5ci/Sh08CMWNWEslSQQFljxsJWsxIJPiQAoVLGUIlJe/sOIviZ0sXgDPatGqLjGQy06/aaLky9xMaUjRXbpNW7AQ8bArY+oqOh4OrsjW79iWSpXB7nqhAO3WhTsDuDQPTiXuHBw3nUQOIH4QeoMuzjt67JMSsDvFuq4MB67qhcOoafHG0YNYKLQeGuiw/acwbk0Kav1ngYZ45L4WhVrLtQIsWwDsGfporMLUgbkDGCrrSSA1+GLb3z01fd47BEK8RUQvFa7SL6Ys/dsAnjuSJLrOv+U9cWPIg1vE9izJ8CjhfjNfiL1VkklrG6ZbYJEa8pZ30dcgzslQPqgdFskn+J1Na1V59Eux6CAHd+CPoixGMtSRhJ3UkiztQK77HGdz1jUo1SLkTiFtkQdQjvoAPeD2y6vODYghbZRzAeYAX5ezTL3KatVJR0Iu1vNuwWlq4+MMoCxVja08K0RoYuC16LPbIUsXWUPUgdBblv20zYsIL9p/JsbIojXMoFllgk/qq+t6uF4tdHJ3MgHdubK0yX+LoYe6cfew8i/5gJLPgDUUvK0kfXcpFur9dDDbTt2gGKBC4R+LURbuN2Fbp1IPnVcbsBwr/fo4w0lbIv+KlqXconFWHrXBAMGpjHP9jy/iQr0Tofv8PE0EpgxeLz/QN95R+dJF+7+pwbG7T8Qijr0+7MvScXEWnz87BYU8z1uKB7ds3/kM9iWOqqLCv+xX6D3nPHwSSHnAKzEPz+8YkPFuZld+6Q4TT3L/ZgsW21ifWSwub4Na4EBc7OwsW6/Ys/57sczjj7WJsNtOlk1/TnWAs94GI=">	
+			<param name="Visible" value="0">
+			<param name="AutoScroll" value="0">
+			<param name="AutoSize" value="0">
+			<param name="AxBorderStyle" value="1">
+			<param name="Caption" value="scaner">
+			<param name="Color" value="4278190095">
+			<param name="Font" value="宋体">
+			<param name="KeyPreview" value="0">
+			<param name="PixelsPerInch" value="96">
+			<param name="PrintScale" value="1">
+			<param name="Scaled" value="-1">
+			<param name="DropTarget" value="0">
+			<param name="HelpFile" value>
+			<param name="PopupMode" value="0">
+			<param name="ScreenSnap" value="0">
+			<param name="SnapBuffer" value="10">
+			<param name="DockSite" value="0">
+			<param name="DoubleBuffered" value="0">
+			<param name="ParentDoubleBuffered" value="0">
+			<param name="UseDockManager" value="0">
+			<param name="Enabled" value="-1">
+			<param name="AlignWithMargins" value="0">
+			<param name="ParentCustomHint" value="-1">
+		</object>
+	</form>
+</body>
+</html>

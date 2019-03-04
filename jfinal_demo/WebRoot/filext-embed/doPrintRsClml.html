@@ -1,0 +1,113 @@
+<!-- /business/print/doPrintJml.jsp(by <zhongty>) -->
+
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>打印人事档案材料目录</title>
+<!-- css start -->
+<style type="text/css">
+	.h3 {
+		line-height: 35px;
+		font-family: "黑体";
+	}
+	
+	.form02 {
+		border-collapse: collapse;
+		width:650px;
+	}
+	
+	.form02 tr {
+		height: 30px;
+	}
+	
+	.form02 td {
+		border: 1px solid #333333;
+		font-size: 12px; /*字体大小*/
+		text-align: center ; /*对齐方式*/
+		height: 23px;
+		vertical-align: middle;
+		padding: 6px 5px;
+		font-family: "黑体";
+	}
+	.form03 td {
+		border: 1px solid #333333;
+		font-size: 14px; /*字体大小*/
+		text-align: left; /*对齐方式*/
+		height: 100px;
+		vertical-align: middle;
+		padding: 6px 5px;
+		font-family: "黑体";
+	}
+	
+	.form02 th{
+		border: 1px solid #333333;
+		font-size: 12px; /*字体大小*/
+		text-align: center; /*对齐方式*/
+		line-height: 23px;
+		vertical-align: middle;
+		padding: 6px 5px;
+		font-family: "黑体";
+	}
+	
+	.form02 .infospace{
+		font-size:14px;
+		font-weight: normal;
+/* 		border-top: none; */
+/* 		border-left: none; */
+/* 		border-right: none; */
+	}
+	
+	.form02 tfoot tr td{
+		border-bottom: none;
+		border-left: none;
+		border-right: none;
+		font-size:14px;
+		text-align: right;
+	}
+</style>
+<!-- css end -->
+
+<body>
+
+	<!-- 页面内容 start -->
+		<table class="form02" border="0">
+			 <colgroup>
+				<col width="10%" />
+				<col width="60%" />
+				<col width="15%" />
+				<col width="15%" />
+			</colgroup>
+			<thead>
+				<tr>
+					<th colspan="4" style="font-size:22px">人事档案目录</th>
+				</tr>
+				<tr>
+					<th class="infospace" colspan="4">
+						姓名：{name}&nbsp;身份证：{cardid}&nbsp;出生年月：{birthday}&nbsp;性别：{sex}
+					</th>
+				</tr>
+				<tr>
+					<th>类号</th>
+					<th>材料名称</th>
+					<th>页数</th>
+					<th>备注</th>
+				</tr>
+			</thead>
+			<tfoot>
+				<tr>
+					<td colspan="4">制表日期：{created}</td>
+				</tr>
+			</tfoot>
+			<tbody>
+			{$$$$}
+			</tbody>
+		</table>
+	
+	<!-- 页面内容 end -->
+
+	<!-- js start -->
+	<script type="text/javascript">
+	</script>
+	<!-- js end -->	
+</body>
+
+</html>

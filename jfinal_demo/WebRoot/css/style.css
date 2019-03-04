@@ -1,0 +1,43 @@
+body
+{
+    padding-left:10px;
+    font-size:13px;
+}
+h1
+{
+    font-size:20px;
+    font-family:Verdana;
+}
+h4
+{
+    font-size:16px;
+    margin-top:25px;
+    margin-bottom:10px;
+}
+
+.description
+{
+    padding-bottom:30px;
+    font-family:Verdana;
+}
+.description h3
+{
+    color:#CC0000;
+    font-size:16px;
+    margin:0 30px 10px 0px;
+    padding:45px 0 8px;
+    /*background:url(titleback.png) no-repeat scroll left bottom transparent*/
+    border-bottom:solid 1px #888;
+}
+.mini-toolbar tr td a{
+	margin: 3px 0 3px 3px;
+}
+.mini-grid-headerCell-outer{
+	padding-left: 2px !important;
+}
+.mini-grid-checkbox{
+	margin-top: 3px !important;
+}
+#newsDatagrid td{
+	text-align: center;
+}

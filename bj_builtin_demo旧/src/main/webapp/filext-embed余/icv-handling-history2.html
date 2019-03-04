@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>影像采集和查看器(历史办件)(余)</title>
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"></link>
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap-icon.css"></link>
+<link rel="stylesheet" href="lib/jcrop/css/jquery.Jcrop.min.css"></link>
+<link rel="stylesheet" href="lib/jquery/jquery-slider.min.css"></link>
+<link rel="stylesheet" href="lib/uploadify/uploadify.css"></link>
+<link rel="stylesheet" href="lib/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css"></link>
+
+<link rel="stylesheet" href="style/style2.css"></link>
+<style>
+body {
+	font-size: 12px !important;	
+}
+
+#listView .thumb {
+	top: -11px
+}
+</style>
+</head>
+
+<body>
+<div class="container-fluid">
+	<div class="clearfix" id="view">
+		<div class="content-wrap">
+			<!-- 查询框 -->
+			<div style="margin-bottom: 5px;">
+				<span>办件查询：</span>
+				<div class="input-group" style="width: 250px; display: inline-flex;">
+			      <input type="text" class="form-control" placeholder="请输入事项名称或事项编码" id="handling-input">
+			      <span class="input-group-btn">
+			        <button class="btn btn-default" type="button" id="handling-search">查询</button>
+			      </span>
+			    </div><!-- /input-group -->
+				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+			</div>
+			<!-- 列表视图 -->
+			<div id="listView" style="border:1px solid #ccc; height:90%">
+				<div class="guide" style="width:30%">
+					<div class="side-btn"><i class="glyphicon pull-right"></i></div>
+					<div class="thumbHandling"></div>
+				</div>
+				<div class="guide">
+					<div class="side-btn"><i class="glyphicon pull-right"></i></div>
+					<div class="thumb"></div>
+				</div>
+				<div id="dragWrap" class="content clearfix"></div>
+				<div id="fileInfo"></div>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="refreshing">loading......</div>
+<div id="showtip"></div>
+<div id="loading"><img src="style/images/loading.gif" /></div>
+
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="lib/handlebars/handlebars-v2.0.0.js"></script>
+<script type="text/javascript" src="lib/dragsort/jquery.dragsort-0.5.2.js"></script>
+<script type="text/javascript" src="lib/jcrop/js/jquery.Jcrop.min.js"></script>
+<script type="text/javascript" src="lib/jquery/jquery-slider.min.js"></script>
+<script type="text/javascript" src="lib/pdf/jquery.media.js"></script>
+<script type="text/javascript" src="lib/bootstrap-datetimepicker/bootstrap-datetimepicker.js"></script>
+<script type="text/javascript" src="lib/bootstrap-datetimepicker/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+<!-- uploadify -->
+<script type="text/javascript" src="lib/uploadify/jquery.uploadify.min.js"></script>
+<!-- scripts -->
+<script type="text/javascript" src="bin/icv-impl.js?v1.1"></script>
+<script type="text/javascript" src="bin/icv-sdk.js?v1.1"></script>
+<script type="text/javascript" src="bin/script2.js?v1.2"></script>
+<script type="text/javascript" src="icv2.js?v1.1"></script>
+<script type="text/javascript">
+	var fuid;			// 办件id
+	var subjectName;	// 主体名称
+	var subjectKey;		// 主体编码
+	var subjectType;	// 主体类型
+	var appcontext;		// 应用上下文
+	
+	// 初始化环境
+	function initEnv(params) {
+		initParams(params);
+		initIcv();
+		initHistory();
+	}
+	
+	// 初始化参数
+	function initParams(params) {
+		fuid = params.fuid;
+		subjectName = params.subjectName;
+		subjectKey = params.subjectKey;
+		subjectType = params.subjectType;
+		appcontext = params.appcontext;
+	}
+	
+	// 初始化ICV
+	function initIcv() {
+		icv.config.params = {
+			subjectName : subjectName,
+			subjectKey : subjectKey,
+			subjectType : subjectType
+		};
+		icv.setupConfig({
+			appcontext : appcontext,
+			privilege : {
+				disableOperate : true,
+				disablePrint : true,
+				disableDownload : true,
+				disableUncategory : true,
+				enableVersion : true,
+				enableTime : true
+			},
+			nodeBranch : '',
+			watermarkCode : ''
+		});
+		
+		if (icv) icv.ctloaded.call(icv, window);
+	}
+	
+	function initHistory() {
+		var config = icv.getIcvConfig() || {};
+		filextApi = new FilextApi(config);
+		privilege = config.config.privilege || {};
+		initHistoryPage();
+	}
+	
+	function initHistoryPage(){
+		$('#refreshing').fadeIn();
+		
+		fetchHistoryData();	// 获取历史数据
+		initHandlingView(); // 渲染历史办件
+		initListView();		// 渲染列表页
+		setViewOnly();		// 只读
+		
+		setTimeout(function() {
+			$('#refreshing').fadeOut('slow');
+		}, 1000);
+	}
+	
+	function setViewOnly() {
+		$('#items').remove();
+		$('.thumbTable input[type="checkbox"]').parent().remove();
+		$('.thumbTable th:eq(2)').text('版本号');
+		$('.thumbTable tr :first-child').css('border-left', 'none');
+		$('#listView .content li .operate').remove();
+		$('#listView .content .collection').remove();
+		$('.checkpic').remove();
+		$('.star').remove();
+		$('#listView .content li').hover(function(e) {
+			$('#listView .content li .title').show();
+		});
+		$(".badge-version").parent().off('click');
+		/* 点击分类 */
+		$('tr.thumbItem').off('click').click(function() {
+			$('#listView .thumbItem.active').removeClass('active');
+			$('tr.thumbItem .icon-white').removeClass('icon-white');
+			$(this).addClass('active');
+			$(this).children('i').addClass('icon-white');
+			currentId = $(this).data('id');
+			updateContent();
+			$(".badge-item-version").off('click');
+		});
+		
+		if(privilege.enableGroup) $('.collection').hide();
+		
+		$(".thumbTable tr:eq(1)").click();
+	}
+
+	function fetchHistoryData() {
+		rootJson = filextApi.viewHandlingHistory({ 'uuid':fuid, 'subjectName':subjectName, 'subjectKey':subjectKey, 'subjectType':subjectType }).data || {};
+		initData = rootJson.children || [];
+		
+		rootJson.watermark = rootJson.watermark || '';
+
+		if (rootJson.fileSizeLimit)
+			filextApi.fileSizeLimit = rootJson.fileSizeLimit;
+		if (privilege.disableOperate == null && rootJson.allowEdit == false && rootJson.collection == true) {
+			privilege.disableOperate = true;
+		}
+		if(rootJson.enableGroup){
+			if(initData.length == 0 || (initData[0].code != null && initData[0].code != '')) 
+				privilege.enableGroup = true;
+		}
+		
+		pidMap[filextApi.uuid] = initData;
+		//获取分类数据
+		for(var i in initData) {
+			var uuid = initData[i].uuid;
+			var res = filextApi.getSubData(uuid);
+			pidMap[uuid] = filterCache(res.data) || [];
+			thumbPageMap[uuid] = {
+				'pageIndex' :　1,
+				'pageSize' : 10																																																									
+			};
+		}
+		generateIdMap();
+	}
+	
+	// 获取选中的材料主键
+	function getSelectedId() {
+		return $("#listView .thumb tr.active").data("id");
+	}
+	
+	// 获取选中的材料版本
+	function getSelectedVersion() {
+		return $("#listView .thumb tr.active").data("cv");
+	}
+	
+	// 渲染历史办件列表
+	function initHandlingView() {
+		console.log(rootJson);
+		compileTemplate(handlingTemplate, {'data' : rootJson}, '#listView .thumbHandling');
+		$('.handling-index').each(function() {
+			$(this).text(parseInt($(this).text())+1);
+		});
+//		$('.selectTrue').append("<label style='width:15px'><input  type='checkbox'/></label>");
+		$('.handlingTable tr :first-child').css('border-left', 'none');
+		$('.handlingTable tr :last-child').css('border-right', 'none');
+		$('.handlingTable li :first-child').css('border-left', 'none');
+		$('.handlingTable li :last-child').css('border-right', 'none');
+		$('#listView .thumbHandling').scroll(function(){
+			initOffsetMap();
+		});
+		$('tr.handlingItem').addClass('viewThumbItem');
+		$('li.handlingItem').addClass('viewThumbItem');
+		
+		$('#listView').show();
+		$('#editView').hide();
+		$('#detailView').hide();
+		
+		/* 点击分类 */
+		$('tr.handlingItem').off('click').click(function() {
+			$('#listView .handlingItem.active').removeClass('active');
+			$('tr.handlingItem .icon-white').removeClass('icon-white');
+			$(this).addClass('active');
+			$(this).children('i').addClass('icon-white');
+			currentId = $(this).data('id');
+			updateContent();
+		});
+	}
+</script>
+</body>
+</html>

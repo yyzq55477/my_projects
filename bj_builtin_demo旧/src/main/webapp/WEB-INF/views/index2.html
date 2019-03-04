@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>电子影像Demo</title>
+</head>
+<body style="background-color: #ededed">
+	<div style="margin: 0 auto; text-align:center; width: 800px">
+		<h3>电子影像Demo</h3>
+		<div id="test" style="height:350px; border:1px solid #ccc"></div>
+<!-- 		<div style="border:1px solid #ccc">
+			<p>后台调用样例</p>
+			<form id="uploadForm" enctype="multipart/form-data" style="display:inline-block">
+		    	<input id="file" type="file" name="file" />
+		    </form>
+		    <button id="upload">上传文件</button>
+		</div>
+		<button id = "javaTest">后端方法测试</button> -->
+		<button id = "AA">测试</button>
+	</div>
+	<script type="text/javascript" src="#(CONTEXT_PATH)/filext-embed/shelf/lib/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="#(CONTEXT_PATH)/filext-embed/icv2.js?v2.3"></script>
+	<script type="text/jscript">
+ 		//影像对接
+		var div ='test';
+		var bizCode = 'a6b48b94';//事项编码
+		var book;
+		var subjectType,subjectKey,subjectName;
+		var params = {
+			subjectType:'09',//主体类型 01：个人 02：单位
+			subjectKey:'sxrsks',//主体编码
+			subjectName:'测试'
+		}
+		var bizId='ks04Pk';//业务主键，登记页面不需要业务主键，传空（YX1719）
+		var fuid = null;//档案件唯一标示，登记页面不需要业务主键，传空（YX1700）
+		var jgCode = null;//不知道是什么东西
+		icv.setupConfig({
+			appcontext:'#(CONTEXT_PATH)',//业务系统上下文地址
+			privilege:{
+				disablePrint : true,
+				disableDownload : true,
+				disableOperate : false
+			},
+		}).render(div,bizCode,bizId,fuid,jgCode,params); 
+		
+		// 影像后台调用样例
+		$("#upload").click(function () {
+            var formData = new FormData($('#uploadForm')[0]);
+            $.ajax({
+                type: "post",
+                url: "/lemis/upload/upload",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(result){
+                	alert("上传成功");
+                },
+                error: function() {
+                	alert("上传失败");
+                }
+            });
+        }); 
+		
+		// 影像后台调用测试
+		$("#javaTest").click(function () {
+            $.ajax({
+                type: "post",
+                url: "/lemis/upload/test",
+                data: {},
+                contentType: false,
+                processData: false,
+                success: function(result){
+                	console.log(result)
+                },
+                error: function() {
+                	alert(result);
+                }
+            });
+        }); 
+		$("#AA").click(function(){
+			alert("lalala");
+		});
+	</script>
+</body>
+</html>
